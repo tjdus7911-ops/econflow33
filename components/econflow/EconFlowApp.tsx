@@ -335,7 +335,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
             <div className="period-tabs" aria-label="차트 기간 선택">{marketPeriods.map((period) => <button key={period.id} className={marketPeriod === period.id ? "selected" : ""} onClick={() => setMarketPeriod(period.id)} aria-pressed={marketPeriod === period.id}>{period.label}</button>)}</div>
             <MarketLineChart values={indicator.history[marketPeriod]} direction={indicator.direction} />
           </section>
-          <section className="market-explanation-card"><div><span>이게 무슨 뜻이에요?</span><h2>{indicator.name}을 쉽게 보면</h2><p>{indicator.simpleExplanation}</p></div><Character size="sm" pose="news" /></section>
+          <section className="market-explanation-card"><div><span>이게 무슨 뜻이에요?</span><h2>{indicator.name}을 쉽게 보면</h2><p>{indicator.simpleExplanation}</p></div><Character size="sm" pose="thinking" /></section>
           <section className="explain-section market-reasons"><span className="step-number">WHY</span><h2>왜 움직였어요?</h2><p>오늘 {indicator.name}에 영향을 준 요인을 쉬운 말로 정리했어요.</p><div className="reason-list">{indicator.marketReasons.map((reason, index) => <article key={reason.title}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{reason.title}</strong><p>{reason.description}</p></div></article>)}</div></section>
           <section className="section-block roomy"><SectionHeader title="관련 뉴스" /><div className="news-list">{relatedNews.map((item) => item ? <NewsCard key={item.id} item={item} compact onClick={() => openNews(item.id)} /> : null)}</div></section>
           <section className="section-block roomy"><SectionHeader kicker="이 개념이 어렵다면?" title="5분 경제 공부" /><div className="learning-stack">{relatedLessons.map((lesson) => lesson ? <LearningCard key={lesson.id} lesson={lesson} featured onClick={() => openLesson(lesson.id)} /> : null)}</div></section>
@@ -369,7 +369,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
         <section className="section-block roomy"><SectionHeader title="지금 많이 보는 강의" /><div className="popular-lessons">{studyLessons.slice(0, 3).map((lesson, index) => <button key={lesson.id} onClick={() => openLesson(lesson.id)}><span className="popular-rank">{index + 1}</span><span className="popular-lesson-icon"><BookOpen aria-hidden="true" /></span><strong>{lesson.title}</strong><small>{lesson.duration} · {lesson.category}</small></button>)}</div></section>
         <section className="section-block roomy"><SectionHeader title="카테고리로 배우기" /><StudyCategoryGrid onSelect={(category) => setNotice(`${category} 학습 콘텐츠를 모아볼 수 있어요.`)} /></section>
         <QuizSection selectedOption={selectedOption} setSelectedOption={(option) => { setSelectedOption(option); setShowAnswer(false); }} showAnswer={showAnswer} setShowAnswer={setShowAnswer} />
-        <section className="attendance-card"><CalendarCheck2 aria-hidden="true" /><div><strong>이번 주 4일 출석했어요</strong><p>내일도 이어서 13일 연속 학습에 도전해요.</p></div><Character size="sm" pose="cheer" /></section>
+        <section className="attendance-card"><CalendarCheck2 aria-hidden="true" /><div><strong>이번 주 4일 출석했어요</strong><p>내일도 이어서 13일 연속 학습에 도전해요.</p></div><Character size="sm" pose="welcome" /></section>
       </div>
     </>
   );
@@ -384,7 +384,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
           <div className="lesson-progress"><span style={{ width: "34%" }} /></div>
           {lesson.sections.map((section, index) => <section className="lesson-section" key={section.title}><span>{String(index + 1).padStart(2, "0")}</span><div><h2>{section.title}</h2><p>{section.body}</p></div></section>)}
           <section className="takeaway-card"><BookCheck aria-hidden="true" /><div><h2>오늘 배운 핵심</h2><ul>{lesson.takeaways.map((item) => <li key={item}><Check aria-hidden="true" />{item}</li>)}</ul></div></section>
-          <section className="completion-card"><Character size="sm" pose="correct" /><div><span>여기까지 읽었어요!</span><strong>이제 뉴스 속 개념이 조금 더 선명해질 거예요.</strong></div><PrimaryButton onClick={() => go("study", "/study")}>다른 공부 보기</PrimaryButton></section>
+          <section className="completion-card"><Character size="sm" pose="success" /><div><span>여기까지 읽었어요!</span><strong>이제 뉴스 속 개념이 조금 더 선명해질 거예요.</strong></div><PrimaryButton onClick={() => go("study", "/study")}>다른 공부 보기</PrimaryButton></section>
         </article>
       </>
     );
@@ -426,7 +426,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
           <section className="profile-identity"><Character size="sm" pose="default" /><div><h1>서연님</h1><p>경제와 함께 성장하는 중이에요! <span aria-hidden="true">🌱</span></p></div><ChevronRight aria-hidden="true" /></section>
           <section className="profile-level"><div><strong>Lv.3</strong><span>320 / 500</span></div><div className="profile-level-track"><i /></div><span className="profile-level-badge"><Star aria-hidden="true" /></span></section>
           <section className="profile-shortcuts">{shortcuts.map((item) => { const Icon = item.icon; return <button key={item.title} onClick={item.action}><span><Icon aria-hidden="true" /></span><strong>{item.title}</strong><small>{item.value}</small></button>; })}</section>
-          <section className="profile-flow-banner"><div><strong>EconFlow와 함께</strong><p>경제 흐름을 더 쉽게 이해해보세요.</p></div><Character size="sm" pose="cheer" /></section>
+          <section className="profile-flow-banner"><div><strong>EconFlow와 함께</strong><p>경제 흐름을 더 쉽게 이해해보세요.</p></div><Character size="sm" pose="welcome" /></section>
           <div className="profile-settings-list">{menu.map((item) => { const Icon = item.icon; return <button key={item.title} onClick={item.action}><span className="profile-menu-icon"><Icon aria-hidden="true" /></span><strong>{item.title}</strong><ChevronRight aria-hidden="true" /></button>; })}</div>
           {notice ? <div className="inline-notice"><CheckCircle2 aria-hidden="true" />{notice}</div> : null}
           <p className="demo-label">EconFlow MVP · 데모 콘텐츠</p>
@@ -451,10 +451,10 @@ function QuizSection({ selectedOption, setSelectedOption, showAnswer, setShowAns
   const isCorrect = selectedOption === quiz.answer;
   return (
     <section className="quiz-card">
-      <div className="quiz-head">{showAnswer ? <span><GraduationCap aria-hidden="true" /></span> : <Character size="sm" pose="curious" />}<div><p>오늘의 퀴즈</p><h2>배운 내용을 확인해 볼까요?</h2></div></div>
+      <div className="quiz-head">{showAnswer ? <span><GraduationCap aria-hidden="true" /></span> : <Character size="sm" pose="thinking" />}<div><p>오늘의 퀴즈</p><h2>배운 내용을 확인해 볼까요?</h2></div></div>
       <p className="quiz-question">{quiz.question}</p>
       <div className="quiz-options">{quiz.options.map((option, index) => <button key={option} className={`${selectedOption === index ? "selected" : ""}${showAnswer && index === quiz.answer ? " correct" : ""}${showAnswer && selectedOption === index && index !== quiz.answer ? " wrong" : ""}`} onClick={() => setSelectedOption(index)}><span>{String.fromCharCode(65 + index)}</span>{option}{showAnswer && index === quiz.answer ? <Check aria-hidden="true" /> : null}</button>)}</div>
-      {showAnswer && selectedOption !== null ? <div className={`quiz-result ${isCorrect ? "correct" : "retry"}`}><Character size="sm" pose={isCorrect ? "correct" : "curious"} /><span><strong>{isCorrect ? "정답이에요!" : "한 번 더 생각해 봐요."}</strong><p>{quiz.explanation}</p></span></div> : null}
+      {showAnswer && selectedOption !== null ? <div className={`quiz-result ${isCorrect ? "correct" : "retry"}`}><Character size="sm" pose={isCorrect ? "success" : "thinking"} /><span><strong>{isCorrect ? "정답이에요!" : "한 번 더 생각해 봐요."}</strong><p>{quiz.explanation}</p></span></div> : null}
       <PrimaryButton onClick={() => selectedOption !== null && setShowAnswer(true)} secondary={selectedOption === null}>정답 확인하기</PrimaryButton>
     </section>
   );

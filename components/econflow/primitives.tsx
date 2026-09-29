@@ -29,8 +29,8 @@ import {
 import type { Issue } from "@/data/issues";
 import type { Lesson } from "@/data/lessons";
 import type { NewsItem } from "@/data/news";
-import { Character } from "./Character";
-export { Character };
+import { Character, EconFlowCharacter } from "./Character";
+export { Character, EconFlowCharacter };
 export type { CharacterPose, CharacterSize } from "./Character";
 
 export type MainTab = "home" | "news" | "research" | "market" | "profile";
@@ -217,5 +217,5 @@ export function EconomicTermTooltip({ term, definition }: { term: string; defini
 }
 
 export function EmptyState({ title, description }: { title: string; description: string }) {
-  return <div className="empty-state"><Character size="sm" pose="default" /><strong>{title}</strong><p>{description}</p></div>;
+  return <div className="empty-state"><Character size="sm" pose="empty" /><strong>{title}</strong><p>{description}</p></div>;
 }

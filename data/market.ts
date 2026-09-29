@@ -55,7 +55,7 @@ export const marketSummary: {
     { label: "원/달러 환율", direction: "up" },
     { label: "주식", direction: "up" },
   ],
-  characterPose: "up",
+  characterPose: "market",
   updatedAt: "오늘 오전 10:20",
   dataSource: "mock",
 };
