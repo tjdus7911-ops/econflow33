@@ -78,13 +78,27 @@ export function DailyStory({ issue, onSelect }: { issue: Issue; onSelect: () => 
   return (
     <section className="daily-story" aria-labelledby="daily-story-title">
       <div className="daily-story-copy">
-        <span className="story-label">오늘 꼭 알아야 할 이야기</span>
-        <span className="story-time"><Clock3 aria-hidden="true" /> 3분으로 이해하기</span>
+        <span className="story-label">{issue.keywords.slice(0, 2).join(" · ")}</span>
+        <span className="story-time"><Clock3 aria-hidden="true" /> 3분 만에 이해하기</span>
         <h2 id="daily-story-title">{issue.title}</h2>
         <p>{issue.summary}</p>
         <PrimaryButton onClick={onSelect}>지금 이해하기 <ChevronRight aria-hidden="true" /></PrimaryButton>
       </div>
       <Character pose="news" size="lg" />
+    </section>
+  );
+}
+
+export function HomeLearningCard({ lesson, onStart }: { lesson: Lesson; onStart: () => void }) {
+  return (
+    <section className="home-learning-card" aria-labelledby="home-learning-title">
+      <div>
+        <span>오늘 5분 경제 공부</span>
+        <h2 id="home-learning-title">{lesson.title}</h2>
+        <p><Clock3 aria-hidden="true" /> {lesson.duration} · {lesson.difficulty}</p>
+        <PrimaryButton onClick={onStart}>지금 시작하기 <ChevronRight aria-hidden="true" /></PrimaryButton>
+      </div>
+      <Character pose="study" size="lg" />
     </section>
   );
 }
@@ -123,33 +137,30 @@ export function StudyCategoryGrid({ onSelect }: { onSelect: (category: string) =
 }
 
 const companies = [
-  { name: "삼성전자", ticker: "005930", mark: "S", tone: "blue" },
-  { name: "SK하이닉스", ticker: "000660", mark: "SK", tone: "red" },
-  { name: "NAVER", ticker: "035420", mark: "N", tone: "green" },
-  { name: "카카오", ticker: "035720", mark: "K", tone: "yellow" },
+  { name: "삼성전자", ticker: "005930", mark: "S", tone: "blue", change: "+2.3%" },
+  { name: "SK하이닉스", ticker: "000660", mark: "SK", tone: "red", change: "+1.8%" },
+  { name: "NAVER", ticker: "035420", mark: "N", tone: "green", change: "-0.4%" },
+  { name: "현대차", ticker: "005380", mark: "H", tone: "navy", change: "+1.2%" },
 ];
 
 const industries = [
-  { label: "반도체", icon: Cpu },
-  { label: "AI·빅테크", icon: ChartNoAxesCombined },
-  { label: "금융", icon: BadgeDollarSign },
-  { label: "산업재", icon: Factory },
+  { label: "AI/반도체", icon: Cpu },
+  { label: "2차전지", icon: BadgeDollarSign },
+  { label: "바이오", icon: Building2 },
+  { label: "자동차", icon: ChartNoAxesCombined },
+  { label: "조선/방산", icon: Factory },
 ];
 
 export function ResearchHub({ query, onQuery, issues, news, onOpenIssue, onOpenNews }: { query: string; onQuery: (value: string) => void; issues: Issue[]; news: NewsItem[]; onOpenIssue: (id: string) => void; onOpenNews: (id: string) => void }) {
   const visibleCompanies = companies.filter((company) => `${company.name} ${company.ticker}`.toLowerCase().includes(query.toLowerCase()));
   return (
     <div className="research-hub">
-      <section className="research-search-panel">
-        <div><span>기업 리서치</span><h1>궁금한 기업을<br />쉽게 분석해 보세요.</h1><p>시장 흐름부터 핵심 이슈까지 한 번에 연결해요.</p></div>
-        <Character pose="curious" size="md" />
-        <label className="search-field research-search" htmlFor="company-search"><Search aria-hidden="true" /><input id="company-search" value={query} onChange={(event) => onQuery(event.target.value)} placeholder="기업명 또는 종목코드 검색" /></label>
-      </section>
+      <label className="search-field research-search" htmlFor="company-search"><Search aria-hidden="true" /><input id="company-search" value={query} onChange={(event) => onQuery(event.target.value)} placeholder="기업명, 산업명, 키워드로 검색해보세요" /></label>
 
       <section className="research-section">
-        <div className="research-heading"><h2>인기 기업</h2><button>전체보기 <ChevronRight aria-hidden="true" /></button></div>
+        <div className="research-heading"><h2>요즘 많이 보는 기업</h2><button>전체보기 <ChevronRight aria-hidden="true" /></button></div>
         <div className="company-grid">
-          {visibleCompanies.map((company) => <button key={company.ticker}><span data-tone={company.tone}>{company.mark}</span><strong>{company.name}</strong><small>{company.ticker}</small></button>)}
+          {visibleCompanies.map((company) => <button key={company.ticker}><span data-tone={company.tone}>{company.mark}</span><strong>{company.name}</strong><small className={company.change.startsWith("-") ? "negative" : "positive"}>{company.change}</small></button>)}
           {!visibleCompanies.length ? <div className="research-empty">검색된 기업이 없어요.</div> : null}
         </div>
       </section>
@@ -165,8 +176,8 @@ export function ResearchHub({ query, onQuery, issues, news, onOpenIssue, onOpenN
       </section>
 
       <section className="research-section research-notes">
-        <div className="research-heading"><h2>리서치 노트</h2></div>
-        <div className="note-grid">{news.slice(0, 2).map((item) => <button key={item.id} onClick={() => onOpenNews(item.id)}><PencilLine aria-hidden="true" /><strong>{item.title}</strong><span>{item.summary}</span></button>)}</div>
+        <div className="research-heading"><h2>내 리서치 노트</h2><button>전체보기 <ChevronRight aria-hidden="true" /></button></div>
+        <div className="note-list">{news.slice(0, 3).map((item, index) => <button key={item.id} onClick={() => onOpenNews(item.id)}><span className="note-mark"><PencilLine aria-hidden="true" /></span><span><strong>{item.keywords[0] ?? item.category}</strong><small>노트 {3 - index}개 · {item.publishedAt}</small></span><ChevronRight aria-hidden="true" /></button>)}</div>
       </section>
     </div>
   );

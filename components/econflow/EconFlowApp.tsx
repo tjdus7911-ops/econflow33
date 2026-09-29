@@ -5,20 +5,22 @@ import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   BellRing,
+  Bookmark,
   BookCheck,
   BookOpen,
+  Building2,
   ChartNoAxesCombined,
   Check,
   CheckCircle2,
   ChevronRight,
   CircleHelp,
   Clock3,
-  Crown,
   CalendarCheck2,
   Flame,
   GraduationCap,
   Heart,
   Info,
+  Landmark,
   Newspaper,
   Search,
   Settings,
@@ -27,7 +29,6 @@ import {
   Star,
   TrendingDown,
   TrendingUp,
-  UserRound,
 } from "lucide-react";
 import { issues, issueCategories } from "@/data/issues";
 import { news } from "@/data/news";
@@ -50,23 +51,23 @@ import {
   SectionHeader,
   type MainTab,
 } from "./primitives";
-import { MarketDataState, MarketIndicatorCard, MarketLineChart, MarketLinkCard, formatMarketValue } from "./market";
-import { DailyStory, IssueHierarchy, MarketStrip, ResearchHub, StudyCategoryGrid, StudyMission } from "./dashboard";
+import { MarketDataState, MarketIndexRow, MarketIndicatorCard, MarketLineChart, MarketLinkCard, MarketThemeRow, formatMarketValue } from "./market";
+import { DailyStory, HomeLearningCard, ResearchHub, StudyCategoryGrid, StudyMission } from "./dashboard";
 
 export type EconFlowView = "home" | "issues" | "issue-detail" | "news" | "news-detail" | "study" | "lesson" | "research" | "market" | "market-detail" | "profile";
 
-const tabToView: Record<MainTab, EconFlowView> = { home: "home", news: "news", study: "study", research: "research", market: "market", profile: "profile" };
-const tabToPath: Record<MainTab, string> = { home: "/", news: "/news", study: "/study", research: "/research", market: "/market", profile: "/my" };
+const tabToView: Record<MainTab, EconFlowView> = { home: "home", news: "news", research: "research", market: "market", profile: "profile" };
+const tabToPath: Record<MainTab, string> = { home: "/", news: "/news", research: "/research", market: "/market", profile: "/my" };
 
 const studyCategories = ["추천", "기초", "시장", "기업", "투자전략"];
 const newsDisplayCategories = ["전체", "경제정책", "주식", "글로벌", "산업", "환율"];
 const marketViewCategories = [
-  { id: "all", label: "전체" },
   { id: "kr-stock", label: "국내주식" },
   { id: "us-stock", label: "미국주식" },
   { id: "fx", label: "환율" },
   { id: "rate", label: "금리" },
   { id: "commodity", label: "원자재" },
+  { id: "bond", label: "채권" },
 ] as const;
 const marketPeriods: { id: MarketPeriod; label: string }[] = [
   { id: "1w", label: "1주" },
@@ -85,8 +86,10 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
   const [issueFilter, setIssueFilter] = useState("전체");
   const [newsFilter, setNewsFilter] = useState("전체");
   const [learningFilter, setLearningFilter] = useState("추천");
-  const [marketFilter, setMarketFilter] = useState<"all" | "kr-stock" | "us-stock" | MarketCategory>("all");
+  const [marketFilter, setMarketFilter] = useState<"kr-stock" | "us-stock" | MarketCategory>("kr-stock");
   const [marketPeriod, setMarketPeriod] = useState<MarketPeriod>("1m");
+  const [indexRegion, setIndexRegion] = useState<"KR" | "US" | "OTHER">("KR");
+  const [themeMetric, setThemeMetric] = useState<"up" | "down" | "volume">("up");
   const [query, setQuery] = useState("");
   const [researchQuery, setResearchQuery] = useState("");
   const [savedNewsIds, setSavedNewsIds] = useState<Set<string>>(() => new Set());
@@ -105,7 +108,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
     if (initialView === "market-detail" && initialId) setMarketId(initialId);
   }
 
-  const activeTab: MainTab = view === "news" || view === "news-detail" ? "news" : view === "study" || view === "lesson" ? "study" : view === "research" ? "research" : view === "market" || view === "market-detail" ? "market" : view === "profile" ? "profile" : "home";
+  const activeTab: MainTab | null = view === "news" || view === "news-detail" ? "news" : view === "research" ? "research" : view === "market" || view === "market-detail" ? "market" : view === "profile" ? "profile" : view === "home" || view === "issues" || view === "issue-detail" ? "home" : null;
 
   const go = (next: EconFlowView, path: string) => {
     setView(next);
@@ -148,11 +151,19 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
     return categoryMatch && searchMatch;
   }), [newsFilter, query]);
   const filteredMarket = useMemo(() => marketIndicators.filter((item) => {
-    if (marketFilter === "all") return true;
     if (marketFilter === "kr-stock") return item.category === "stock" && item.country === "KR";
     if (marketFilter === "us-stock") return item.category === "stock" && item.country === "US";
     return item.category === marketFilter;
   }), [marketFilter]);
+  const quickMarket = [...filteredMarket, ...marketIndicators.filter((indicator) => !filteredMarket.some((item) => item.id === indicator.id))].slice(0, 3);
+  const visibleIndices = marketIndicators.filter((indicator) => indexRegion === "KR"
+    ? indicator.category === "stock" && indicator.country === "KR"
+    : indexRegion === "US"
+      ? indicator.category === "stock" && indicator.country === "US"
+      : indicator.category !== "stock").slice(0, 4);
+  const visibleThemes = (themeMetric === "volume"
+    ? [...issues].sort((a, b) => b.articleVolume - a.articleVolume)
+    : issues.filter((issue) => issue.direction === themeMetric)).slice(0, 4);
 
   const renderHome = () => (
     <>
@@ -168,17 +179,13 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
           <Character pose="default" size="lg" />
         </section>
 
-        <section className="section-block market-at-glance">
-          <SectionHeader title="주요 지표" onAction={() => navigateTab("market")} />
-          <MarketStrip indicators={["kospi", "kosdaq", "nasdaq", "usd-krw", "kr-base-rate"].map((id) => marketIndicators.find((item) => item.id === id)).filter((item): item is (typeof marketIndicators)[number] => Boolean(item))} onSelect={openMarket} />
+        <section className="section-block roomy">
+          <SectionHeader kicker="빠르게 훑어보기" title="오늘의 핵심 이슈" count={3} onAction={() => go("issues", "/issues")} />
+          <div className="home-issue-grid">{issues.slice(0, 3).map((issue) => <IssueCard key={issue.id} issue={issue} compact onClick={() => openIssue(issue.id)} />)}</div>
         </section>
 
         <section className="section-block roomy">
-          <SectionHeader title="오늘의 핵심 이슈" onAction={() => go("issues", "/issues")} />
-          <IssueHierarchy items={issues.slice(0, 3)} onSelect={openIssue} />
-        </section>
-
-        <section className="section-block roomy">
+          <SectionHeader title="오늘 꼭 알아야 할 이야기" onAction={() => go("issues", "/issues")} />
           <DailyStory issue={issues[0]} onSelect={() => openIssue(issues[0].id)} />
         </section>
 
@@ -190,8 +197,8 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
         </section>
 
         <section className="section-block roomy">
-          <SectionHeader kicker="하루 한 개념" title="오늘의 경제 공부" onAction={() => navigateTab("study")} />
-          <StudyMission lesson={lessons[0]} onStart={() => openLesson(lessons[0].id)} />
+          <SectionHeader kicker="하루 한 개념" title="오늘의 경제 공부" onAction={() => go("study", "/study")} />
+          <HomeLearningCard lesson={lessons[0]} onStart={() => openLesson(lessons[0].id)} />
         </section>
       </div>
     </>
@@ -242,9 +249,9 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
 
   const renderNews = () => (
     <>
-      <AppHeader title="뉴스" action="search" onAction={() => document.getElementById("news-search")?.focus()} />
+      <AppHeader title="뉴스" onBack={() => navigateTab("home")} action="home" onSearch={() => document.getElementById("news-search")?.focus()} onAction={() => setNotice("새로운 뉴스 알림이 없어요.")} />
       <div className="screen-content page-content news-page">
-        <div className="page-intro compact"><p className="eyebrow">ECONOMY NOW</p><h1>오늘의 흐름을 읽는<br />경제 뉴스</h1><p>복잡한 소식도 핵심 맥락부터 쉽게 정리했어요.</p></div>
+        {notice ? <div className="inline-notice"><BellRing aria-hidden="true" />{notice}</div> : null}
         <label className="search-field" htmlFor="news-search"><Search aria-hidden="true" /><input id="news-search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="뉴스와 경제 키워드 검색" /></label>
         <div className="chip-scroller">{newsDisplayCategories.map((category) => <CategoryChip key={category} label={category} selected={newsFilter === category} onClick={() => setNewsFilter(category)} />)}</div>
         <div className="results-label"><span>오늘의 주요 뉴스 · {filteredNews.length}개</span><SlidersHorizontal aria-hidden="true" /></div>
@@ -278,15 +285,30 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
 
   const renderMarket = () => (
     <>
-      <AppHeader title="시장" action="info" onAction={() => setNotice("현재 시장 수치는 기능 확인을 위한 MVP 예시 데이터예요.")} />
+      <AppHeader title="시장" action="home" onSearch={() => setNotice("시장 카테고리를 눌러 원하는 지표를 빠르게 확인해 보세요.")} onAction={() => setNotice("새로운 시장 알림이 없어요.")} />
       <div className="screen-content page-content market-page">
         {notice ? <div className="inline-notice"><Info aria-hidden="true" />{notice}</div> : null}
-        <div className="market-title-row"><div><p className="eyebrow">MARKET FLOW</p><h1>글로벌 시장 한눈에</h1></div><span>10:20 기준</span></div>
         <div className="chip-scroller market-chips">{marketViewCategories.map((category) => <CategoryChip key={category.id} label={category.label} selected={marketFilter === category.id} onClick={() => setMarketFilter(category.id)} />)}</div>
-        <section className="market-snapshot"><span>오늘의 시장 요약</span><strong>{marketSummary.headline}</strong><p>{marketSummary.description}</p></section>
-        <section className="section-block market-indicators-section">
-          <SectionHeader title="주요 지표" actionLabel="데이터 안내" onAction={() => setNotice("MVP에서는 핵심 10개 지표를 먼저 제공하고 있어요.")} />
-          {filteredMarket.length ? <div className="market-indicator-grid">{filteredMarket.map((indicator) => <MarketIndicatorCard key={indicator.id} indicator={indicator} onClick={() => openMarket(indicator.id)} />)}</div> : <MarketDataState state="empty" />}
+        <section className="section-block market-summary-section">
+          <SectionHeader title="시장 요약" actionLabel="전체보기" onAction={() => setNotice(`${marketSummary.updatedAt} 기준으로 정리한 흐름이에요.`)} />
+          <div className="market-summary-v2"><div><span>오늘의 시장 한눈에 보기</span><strong>{marketSummary.headline}</strong><p>{marketSummary.description}</p></div><Character size="sm" pose={marketSummary.characterPose} /></div>
+        </section>
+        <section className="market-quick-grid" aria-label="선택 카테고리 주요 지표">
+          {quickMarket.map((indicator) => <MarketIndicatorCard key={indicator.id} indicator={indicator} onClick={() => openMarket(indicator.id)} />)}
+        </section>
+        <section className="section-block market-list-section">
+          <SectionHeader title="주요 지수" onAction={() => setNotice("현재 제공 중인 지수를 지역별로 모아 보여드려요.")} />
+          <div className="market-segmented" aria-label="지수 지역 선택">
+            {([{"id":"KR","label":"국내"},{"id":"US","label":"미국"},{"id":"OTHER","label":"기타"}] as const).map((region) => <button key={region.id} className={indexRegion === region.id ? "selected" : ""} onClick={() => setIndexRegion(region.id)}>{region.label}</button>)}
+          </div>
+          {visibleIndices.length ? <div className="market-index-list">{visibleIndices.map((indicator) => <MarketIndexRow key={indicator.id} indicator={indicator} onClick={() => openMarket(indicator.id)} />)}</div> : <MarketDataState state="empty" />}
+        </section>
+        <section className="section-block market-list-section">
+          <SectionHeader title="주요 테마" onAction={() => go("issues", "/issues")} />
+          <div className="market-segmented" aria-label="테마 정렬 선택">
+            {([{"id":"up","label":"상승률"},{"id":"down","label":"하락률"},{"id":"volume","label":"거래량"}] as const).map((metric) => <button key={metric.id} className={themeMetric === metric.id ? "selected" : ""} onClick={() => setThemeMetric(metric.id)}>{metric.label}</button>)}
+          </div>
+          <div className="market-theme-list">{visibleThemes.map((issue) => { const indicator = marketIndicators.find((item) => issue.relatedMarketIds.includes(item.id)); return <MarketThemeRow key={issue.id} issue={issue} indicator={indicator} onClick={() => openIssue(issue.id)} />; })}</div>
         </section>
       </div>
     </>
@@ -362,7 +384,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
           <div className="lesson-progress"><span style={{ width: "34%" }} /></div>
           {lesson.sections.map((section, index) => <section className="lesson-section" key={section.title}><span>{String(index + 1).padStart(2, "0")}</span><div><h2>{section.title}</h2><p>{section.body}</p></div></section>)}
           <section className="takeaway-card"><BookCheck aria-hidden="true" /><div><h2>오늘 배운 핵심</h2><ul>{lesson.takeaways.map((item) => <li key={item}><Check aria-hidden="true" />{item}</li>)}</ul></div></section>
-          <section className="completion-card"><Character size="sm" pose="correct" /><div><span>여기까지 읽었어요!</span><strong>이제 뉴스 속 개념이 조금 더 선명해질 거예요.</strong></div><PrimaryButton onClick={() => navigateTab("study")}>다른 공부 보기</PrimaryButton></section>
+          <section className="completion-card"><Character size="sm" pose="correct" /><div><span>여기까지 읽었어요!</span><strong>이제 뉴스 속 개념이 조금 더 선명해질 거예요.</strong></div><PrimaryButton onClick={() => go("study", "/study")}>다른 공부 보기</PrimaryButton></section>
         </article>
       </>
     );
@@ -370,7 +392,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
 
   const renderResearch = () => (
     <>
-      <AppHeader title="리서치" action="bell" onAction={() => setNotice("새로 도착한 리서치 알림이 없어요.")} />
+      <AppHeader title="리서치" action="home" onSearch={() => document.getElementById("company-search")?.focus()} onAction={() => setNotice("새로 도착한 리서치 알림이 없어요.")} />
       <div className="screen-content page-content research-page">
         {notice ? <div className="inline-notice"><BellRing aria-hidden="true" />{notice}</div> : null}
         <ResearchHub query={researchQuery} onQuery={setResearchQuery} issues={issues} news={news} onOpenIssue={openIssue} onOpenNews={openNews} />
@@ -379,22 +401,33 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
   );
 
   const renderProfile = () => {
+    const shortcuts = [
+      { icon: Heart, title: "관심 종목", value: "12개", action: () => navigateTab("market") },
+      { icon: Sparkles, title: "관심 주제", value: "8개", action: () => go("issues", "/issues") },
+      { icon: Bookmark, title: "저장한 뉴스", value: `${savedNewsIds.size}개`, action: () => navigateTab("news") },
+      { icon: GraduationCap, title: "나의 학습", value: "진행 중 3개", action: () => go("study", "/study") },
+      { icon: ChartNoAxesCombined, title: "투자 성향", value: "균형형", action: () => setNotice("투자 성향 분석은 다음 MVP 단계에서 연결할 수 있어요.") },
+      { icon: BellRing, title: "알림 설정", value: "설정하기", action: () => setNotice("알림 설정은 다음 MVP 단계에서 연결할 수 있어요.") },
+    ];
     const menu = [
-      { icon: UserRound, title: "프로필", subtitle: "닉네임과 기본 정보를 확인해요" },
-      { icon: Heart, title: "관심 주제", subtitle: "금리, 환율, AI 산업" },
-      { icon: BookCheck, title: "학습 기록", subtitle: "이번 주 3개 개념을 읽었어요" },
-      { icon: BellRing, title: "알림 설정", subtitle: "오늘의 브리핑 알림" },
-      { icon: Settings, title: "이용 설정", subtitle: "글자 크기와 서비스 정보" },
-      { icon: CircleHelp, title: "고객센터", subtitle: "궁금한 점을 편하게 물어보세요" },
+      { icon: BookCheck, title: "학습 기록", action: () => go("study", "/study") },
+      { icon: Newspaper, title: "내가 저장한 뉴스", action: () => navigateTab("news") },
+      { icon: Building2, title: "관심 기업/종목", action: () => navigateTab("market") },
+      { icon: Landmark, title: "관심 산업/주제", action: () => go("issues", "/issues") },
+      { icon: BellRing, title: "알림 설정", action: () => setNotice("알림 설정은 다음 MVP 단계에서 연결할 수 있어요.") },
+      { icon: Settings, title: "앱 설정", action: () => setNotice("앱 설정은 다음 MVP 단계에서 연결할 수 있어요.") },
+      { icon: CircleHelp, title: "고객센터", action: () => setNotice("고객센터는 다음 MVP 단계에서 연결할 수 있어요.") },
+      { icon: Info, title: "서비스 소개", action: () => setNotice("EconFlow는 경제 흐름을 쉽고 친근하게 설명하는 서비스예요.") },
     ];
     return (
       <>
         <AppHeader title="내 정보" action="settings" onAction={() => setNotice("이용 설정은 다음 MVP 단계에서 연결할 수 있어요.")} />
         <div className="screen-content page-content profile-page">
-          <section className="profile-card"><Character size="md" pose="default" /><div><span>반가워요</span><h1>서연님</h1><p>경제를 알아가는 12일차예요!</p></div></section>
-          <section className="streak-card"><div><Flame aria-hidden="true" /><strong>12일</strong><span>연속 학습</span></div><div><Crown aria-hidden="true" /><strong>327개</strong><span>퀴즈 정답</span></div><div><Star aria-hidden="true" /><strong>Lv.3</strong><span>나의 등급</span></div></section>
-          <section className="cheer-banner"><Character size="sm" pose="cheer" /><div><strong>Flow가 응원해요!</strong><p>이번 주도 꾸준히 공부하고 있어요.<br />조금 더 하면 다음 레벨이에요.</p></div><ChevronRight aria-hidden="true" /></section>
-          <div className="profile-list">{menu.map((item) => { const Icon = item.icon; return <button key={item.title} onClick={() => setNotice(`${item.title} 기능은 다음 MVP 단계에서 연결할 수 있어요.`)}><span className="profile-menu-icon"><Icon aria-hidden="true" /></span><span><strong>{item.title}</strong><small>{item.subtitle}</small></span><ChevronRight aria-hidden="true" /></button>; })}</div>
+          <section className="profile-identity"><Character size="sm" pose="default" /><div><h1>서연님</h1><p>경제와 함께 성장하는 중이에요! <span aria-hidden="true">🌱</span></p></div><ChevronRight aria-hidden="true" /></section>
+          <section className="profile-level"><div><strong>Lv.3</strong><span>320 / 500</span></div><div className="profile-level-track"><i /></div><span className="profile-level-badge"><Star aria-hidden="true" /></span></section>
+          <section className="profile-shortcuts">{shortcuts.map((item) => { const Icon = item.icon; return <button key={item.title} onClick={item.action}><span><Icon aria-hidden="true" /></span><strong>{item.title}</strong><small>{item.value}</small></button>; })}</section>
+          <section className="profile-flow-banner"><div><strong>EconFlow와 함께</strong><p>경제 흐름을 더 쉽게 이해해보세요.</p></div><Character size="sm" pose="cheer" /></section>
+          <div className="profile-settings-list">{menu.map((item) => { const Icon = item.icon; return <button key={item.title} onClick={item.action}><span className="profile-menu-icon"><Icon aria-hidden="true" /></span><strong>{item.title}</strong><ChevronRight aria-hidden="true" /></button>; })}</div>
           {notice ? <div className="inline-notice"><CheckCircle2 aria-hidden="true" />{notice}</div> : null}
           <p className="demo-label">EconFlow MVP · 데모 콘텐츠</p>
         </div>

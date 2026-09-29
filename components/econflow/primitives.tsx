@@ -15,7 +15,6 @@ import {
   Newspaper,
   Search,
   Settings,
-  Sparkles,
   TrendingDown,
   TrendingUp,
   User,
@@ -34,7 +33,7 @@ import { Character } from "./Character";
 export { Character };
 export type { CharacterPose, CharacterSize } from "./Character";
 
-export type MainTab = "home" | "news" | "study" | "research" | "market" | "profile";
+export type MainTab = "home" | "news" | "research" | "market" | "profile";
 
 export function AppHeader({
   title,
@@ -75,11 +74,10 @@ export function AppHeader({
   );
 }
 
-export function BottomNavigation({ active, onNavigate }: { active: MainTab; onNavigate: (tab: MainTab) => void }) {
+export function BottomNavigation({ active, onNavigate }: { active: MainTab | null; onNavigate: (tab: MainTab) => void }) {
   const items = [
     { id: "home" as const, label: "홈", icon: Home },
     { id: "news" as const, label: "뉴스", icon: Newspaper },
-    { id: "study" as const, label: "공부", icon: BookOpen },
     { id: "research" as const, label: "리서치", icon: Building2 },
     { id: "market" as const, label: "시장", icon: ChartNoAxesCombined },
     { id: "profile" as const, label: "내 정보", icon: User },

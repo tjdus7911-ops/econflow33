@@ -1,4 +1,5 @@
 import { AlertCircle, ArrowRight, Clock3, RefreshCw, TrendingDown, TrendingUp } from "lucide-react";
+import type { Issue } from "@/data/issues";
 import type { MarketDirection, MarketIndicator } from "@/data/market";
 
 const categoryLabels = {
@@ -56,6 +57,33 @@ export function MarketIndicatorCard({ indicator, onClick }: { indicator: MarketI
         <small className="market-updated">{indicator.updatedAt}</small>
       </span>
       <span className="market-chart-wrap"><MiniSparkline values={indicator.sparkline} direction={indicator.direction} /><small>MVP 예시</small></span>
+    </button>
+  );
+}
+
+export function MarketIndexRow({ indicator, onClick }: { indicator: MarketIndicator; onClick: () => void }) {
+  const signedPercent = `${indicator.changePercent > 0 ? "+" : ""}${indicator.changePercent.toFixed(2)}%`;
+  return (
+    <button className="market-index-row" data-direction={indicator.direction} onClick={onClick}>
+      <span className="market-index-name"><i aria-hidden="true" /><strong>{indicator.name}</strong></span>
+      <b>{formatCompactMarketValue(indicator)}</b>
+      <MiniSparkline values={indicator.sparkline} direction={indicator.direction} />
+      <em>{indicator.direction === "steady" ? "0.00%" : signedPercent}</em>
+      <ArrowRight aria-hidden="true" />
+    </button>
+  );
+}
+
+export function MarketThemeRow({ issue, indicator, onClick }: { issue: Issue; indicator?: MarketIndicator; onClick: () => void }) {
+  const direction = indicator?.direction ?? issue.direction;
+  const percent = indicator?.changePercent ?? 0;
+  return (
+    <button className="market-theme-row" data-direction={direction} onClick={onClick}>
+      <span className="market-theme-symbol">{issue.category.slice(0, 1)}</span>
+      <strong>{issue.keywords[0] ?? issue.category}</strong>
+      {indicator ? <MiniSparkline values={indicator.sparkline} direction={direction} /> : <span />}
+      <em>{direction === "steady" ? "보합" : `${percent > 0 ? "+" : ""}${percent.toFixed(2)}%`}</em>
+      <ArrowRight aria-hidden="true" />
     </button>
   );
 }
