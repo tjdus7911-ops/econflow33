@@ -155,7 +155,11 @@ export function ResearchHub({ query, onQuery, issues, news, onOpenIssue, onOpenN
   const visibleCompanies = companies.filter((company) => `${company.name} ${company.ticker}`.toLowerCase().includes(query.toLowerCase()));
   return (
     <div className="research-hub">
-      <label className="search-field research-search" htmlFor="company-search"><Search aria-hidden="true" /><input id="company-search" value={query} onChange={(event) => onQuery(event.target.value)} placeholder="기업명, 산업명, 키워드로 검색해보세요" /></label>
+      <section className="research-search-panel" aria-label="리서치 안내">
+        <div><span>경제 리서치</span><h1>기업과 산업을<br />쉽게, 깊게 살펴봐요.</h1><p>돈똑이가 데이터와 흐름을 함께 정리해드려요.</p></div>
+        <Character pose="analyze" size="md" alt="기업과 산업을 분석하는 돈똑이" />
+        <label className="search-field research-search" htmlFor="company-search"><Search aria-hidden="true" /><input id="company-search" value={query} onChange={(event) => onQuery(event.target.value)} placeholder="기업명, 산업명, 키워드로 검색해보세요" /></label>
+      </section>
 
       <section className="research-section">
         <div className="research-heading"><h2>요즘 많이 보는 기업</h2><button>전체보기 <ChevronRight aria-hidden="true" /></button></div>

@@ -309,6 +309,11 @@ button { color: inherit; }
 .results-label { margin: 2px 0 9px; color: var(--ef-muted); }
 .news-list,
 .news-list.wide { gap: 0; }
+.news-guide { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; padding: 14px 16px 12px; border-radius: var(--ef-radius-lg); background: var(--ef-blue-pale); }
+.news-guide > div { min-width: 0; }
+.news-guide span { display: block; margin-bottom: 4px; color: var(--ef-blue); font-size: .69rem; font-weight: 760; }
+.news-guide strong { display: block; color: var(--ef-ink); font-size: .9rem; line-height: 1.35; letter-spacing: -.035em; }
+.news-guide .character { flex: 0 0 auto; margin: 0 2px -4px 0; }
 .featured-news {
   position: relative;
   display: block;

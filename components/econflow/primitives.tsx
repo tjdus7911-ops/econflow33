@@ -217,5 +217,5 @@ export function EconomicTermTooltip({ term, definition }: { term: string; defini
 }
 
 export function EmptyState({ title, description }: { title: string; description: string }) {
-  return <div className="empty-state"><Character size="sm" pose="empty" /><strong>{title}</strong><p>{description}</p></div>;
+  return <div className="empty-state"><Character size="sm" pose="sad" /><strong>{title}</strong><p>{description}</p></div>;
 }
