@@ -471,9 +471,11 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
 
   const current = view === "home" ? renderHome() : view === "issues" ? renderIssues() : view === "issue-detail" ? renderIssueDetail() : view === "news" ? renderNews() : view === "news-detail" ? renderNewsDetail() : view === "study" ? renderStudy() : view === "lesson" ? renderLesson() : view === "research" ? renderResearch() : view === "market" ? renderMarket() : view === "market-detail" ? renderMarketDetail() : renderProfile();
 
+  const isHome = view === "home";
+
   return (
-    <main className="app-canvas">
-      <div className="phone-shell">
+    <main className={`app-canvas${isHome ? " home-dark-canvas" : ""}`}>
+      <div className={`phone-shell${isHome ? " home-dark-shell" : ""}`}>
         {current}
         <BottomNavigation active={activeTab} onNavigate={navigateTab} />
       </div>
