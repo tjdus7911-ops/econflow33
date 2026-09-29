@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./econflow-v2.css";
 
 export const metadata: Metadata = {
   title: "EconFlow — 오늘의 경제를 쉽게",

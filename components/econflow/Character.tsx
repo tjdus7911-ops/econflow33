@@ -14,28 +14,28 @@ export type CharacterPose =
 
 export type CharacterSize = "sm" | "md" | "lg";
 
-export const CHARACTER_FALLBACK_ASSET = "/characters/nami-default.png";
+export const CHARACTER_FALLBACK_ASSET = "/characters/flow/flow-home.webp";
 
 export const CHARACTER_ASSETS: Record<CharacterPose, string> = {
   default: CHARACTER_FALLBACK_ASSET,
-  up: CHARACTER_FALLBACK_ASSET,
-  down: CHARACTER_FALLBACK_ASSET,
-  news: CHARACTER_FALLBACK_ASSET,
-  study: CHARACTER_FALLBACK_ASSET,
-  curious: CHARACTER_FALLBACK_ASSET,
-  correct: CHARACTER_FALLBACK_ASSET,
-  cheer: CHARACTER_FALLBACK_ASSET,
+  up: "/characters/flow/flow-research.webp",
+  down: "/characters/flow/flow-research.webp",
+  news: "/characters/flow/flow-home.webp",
+  study: "/characters/flow/flow-study.webp",
+  curious: "/characters/flow/flow-research.webp",
+  correct: "/characters/flow/flow-success.webp",
+  cheer: "/characters/flow/flow-success.webp",
 };
 
 const CHARACTER_LABELS: Record<CharacterPose, string> = {
-  default: "인사하는 EconFlow 캐릭터 나미",
-  up: "상승 흐름을 안내하는 EconFlow 캐릭터 나미",
-  down: "하락 흐름을 살펴보는 EconFlow 캐릭터 나미",
-  news: "경제 뉴스를 설명하는 EconFlow 캐릭터 나미",
-  study: "경제를 공부하는 EconFlow 캐릭터 나미",
-  curious: "경제 개념을 생각하는 EconFlow 캐릭터 나미",
-  correct: "정답과 학습 완료를 축하하는 EconFlow 캐릭터 나미",
-  cheer: "학습을 응원하는 EconFlow 캐릭터 나미",
+  default: "인사하는 EconFlow 캐릭터 Flow",
+  up: "상승 흐름을 분석하는 EconFlow 캐릭터 Flow",
+  down: "시장 흐름을 살펴보는 EconFlow 캐릭터 Flow",
+  news: "경제 흐름을 설명하는 EconFlow 캐릭터 Flow",
+  study: "책을 읽으며 공부하는 EconFlow 캐릭터 Flow",
+  curious: "경제 데이터를 분석하는 EconFlow 캐릭터 Flow",
+  correct: "학습 완료를 축하하는 EconFlow 캐릭터 Flow",
+  cheer: "학습을 응원하는 EconFlow 캐릭터 Flow",
 };
 
 export function Character({

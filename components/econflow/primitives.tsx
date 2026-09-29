@@ -5,17 +5,13 @@ import {
   ArrowLeft,
   ArrowRight,
   Bell,
+  Bookmark,
   BookOpen,
   Building2,
   ChartNoAxesCombined,
-  CircleDollarSign,
   Clock3,
-  Factory,
-  Gauge,
-  Globe2,
   Home,
   Info,
-  Landmark,
   Newspaper,
   Search,
   Settings,
@@ -38,18 +34,20 @@ import { Character } from "./Character";
 export { Character };
 export type { CharacterPose, CharacterSize } from "./Character";
 
-export type MainTab = "home" | "news" | "study" | "market" | "profile";
+export type MainTab = "home" | "news" | "study" | "research" | "market" | "profile";
 
 export function AppHeader({
   title,
   onBack,
   action = "none",
   onAction,
+  onSearch,
 }: {
   title: string;
   onBack?: () => void;
-  action?: "none" | "bell" | "search" | "settings" | "info";
+  action?: "none" | "bell" | "search" | "settings" | "info" | "home";
   onAction?: () => void;
+  onSearch?: () => void;
 }) {
   const ActionIcon = action === "bell" ? Bell : action === "settings" ? Settings : action === "info" ? Info : Search;
   return (
@@ -61,9 +59,12 @@ export function AppHeader({
           </button>
         ) : null}
       </div>
-      <strong className={onBack ? "header-title centered" : "brand"}>{title}</strong>
+      <strong className={onBack ? "header-title centered" : "brand"}>{title === "EconFlow" ? <>Econ<span>Flow</span></> : title}</strong>
       <div className="header-side end">
-        {action !== "none" ? (
+        {action === "home" ? <>
+          <button className="icon-button" onClick={onSearch} aria-label="검색"><Search aria-hidden="true" /></button>
+          <button className="icon-button" onClick={onAction} aria-label="알림"><Bell aria-hidden="true" /><span className="notification-dot" /></button>
+        </> : action !== "none" ? (
           <button className="icon-button" onClick={onAction} aria-label={action === "bell" ? "알림" : action === "settings" ? "설정" : action === "info" ? "데이터 안내" : "검색"}>
             <ActionIcon aria-hidden="true" />
             {action === "bell" ? <span className="notification-dot" /> : null}
@@ -77,8 +78,9 @@ export function AppHeader({
 export function BottomNavigation({ active, onNavigate }: { active: MainTab; onNavigate: (tab: MainTab) => void }) {
   const items = [
     { id: "home" as const, label: "홈", icon: Home },
-    { id: "study" as const, label: "공부", icon: BookOpen },
     { id: "news" as const, label: "뉴스", icon: Newspaper },
+    { id: "study" as const, label: "공부", icon: BookOpen },
+    { id: "research" as const, label: "리서치", icon: Building2 },
     { id: "market" as const, label: "시장", icon: ChartNoAxesCombined },
     { id: "profile" as const, label: "내 정보", icon: User },
   ];
@@ -144,21 +146,20 @@ export function IssueCard({ issue, compact = false, onClick }: { issue: Issue; c
   );
 }
 
-const categoryIcons = {
-  주요: Landmark,
-  한국: Building2,
-  미국: CircleDollarSign,
-  글로벌: Globe2,
-  테크: Gauge,
-  산업: Factory,
-} as const;
+const fallbackNewsThumbnail = (item: NewsItem) => {
+  const text = `${item.title} ${item.category} ${item.keywords.join(" ")}`;
+  if (/AI|반도체|데이터센터|산업|테크/.test(text)) return "/news/technology.webp";
+  if (/환율|달러|원화|글로벌|운임/.test(text)) return "/news/currency.webp";
+  return "/news/rates.webp";
+};
 
-export function FeaturedNewsCard({ item, onClick }: { item: NewsItem; onClick: () => void }) {
-  const Icon = categoryIcons[item.category as keyof typeof categoryIcons] ?? Newspaper;
+export function FeaturedNewsCard({ item, onClick, bookmarked = false, onBookmark }: { item: NewsItem; onClick: () => void; bookmarked?: boolean; onBookmark?: () => void }) {
+  const thumbnail = item.imageUrl || item.thumbnail || fallbackNewsThumbnail(item);
   return (
-    <button className="featured-news" data-category={item.category} onClick={onClick}>
+    <article className="featured-news" data-category={item.category}>
+      <button className="featured-news-main" onClick={onClick}>
       <span className={`featured-news-visual tone-${item.category}`}>
-        {item.imageUrl ? <img src={item.imageUrl} alt="" /> : <><span className="news-visual-grid" aria-hidden="true" /><Icon aria-hidden="true" /></>}
+        <img src={thumbnail} alt="" />
       </span>
       <span className="featured-news-copy">
         <span className="news-label-row"><Badge tone="blue">{item.category}</Badge><span className={`content-type-label ${item.contentType}`}>{item.contentType === "briefing" ? "BRIEFING" : "NEWS"}</span></span>
@@ -166,24 +167,26 @@ export function FeaturedNewsCard({ item, onClick }: { item: NewsItem; onClick: (
         <span>{item.summary}</span>
         <small>{item.publishedAt}</small>
       </span>
-    </button>
+      </button>
+      <button className={`news-bookmark${bookmarked ? " saved" : ""}`} onClick={onBookmark} aria-label={bookmarked ? "북마크 해제" : "북마크 저장"}><Bookmark aria-hidden="true" /></button>
+    </article>
   );
 }
 
-export function NewsCard({ item, compact = false, onClick }: { item: NewsItem; compact?: boolean; onClick: () => void }) {
-  const Icon = categoryIcons[item.category as keyof typeof categoryIcons] ?? Newspaper;
+export function NewsCard({ item, compact = false, onClick, bookmarked = false, onBookmark }: { item: NewsItem; compact?: boolean; onClick: () => void; bookmarked?: boolean; onBookmark?: () => void }) {
+  const thumbnail = item.imageUrl || item.thumbnail || fallbackNewsThumbnail(item);
   return (
-    <button className={`news-card${compact ? " compact" : ""}`} data-category={item.category} onClick={onClick}>
-      <span className={`news-thumb tone-${item.category}`}>
-        {item.imageUrl ? <img src={item.imageUrl} alt="" /> : <><span className="news-visual-grid" aria-hidden="true" /><Icon aria-hidden="true" /></>}
-      </span>
-      <span className="news-copy">
-        <strong>{item.title}</strong>
-        {!compact ? <span className="news-summary">{item.summary}</span> : null}
-        <span className="news-meta"><b>{item.contentType === "briefing" ? "BRIEFING" : "NEWS"}</b> · {item.category} · {item.source} · {item.publishedAt}</span>
-      </span>
-      <ArrowRight className="news-arrow" aria-hidden="true" />
-    </button>
+    <article className={`news-card${compact ? " compact" : ""}`} data-category={item.category}>
+      <button className="news-card-main" onClick={onClick}>
+        <span className={`news-thumb tone-${item.category}`}><img src={thumbnail} alt="" /></span>
+        <span className="news-copy">
+          <strong>{item.title}</strong>
+          {!compact ? <span className="news-summary">{item.summary}</span> : null}
+          <span className="news-meta"><b>{item.category}</b><span>{item.publishedAt}</span></span>
+        </span>
+      </button>
+      <button className={`news-bookmark${bookmarked ? " saved" : ""}`} onClick={onBookmark} aria-label={bookmarked ? "북마크 해제" : "북마크 저장"}><Bookmark aria-hidden="true" /></button>
+    </article>
   );
 }
 
