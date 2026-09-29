@@ -1,12 +1,11 @@
 import "server-only";
 
 import type { NewsItem } from "@/data/news";
+import { formatNewsPublishedAt, toNewsItem } from "@/lib/news/normalize";
+import type { NewsProvider } from "@/lib/news/provider";
 
 export const BOK_RSS_URL = "https://www.bok.or.kr/portal/bbs/B0000552/news.rss?menuNo=200690";
 export const BOK_RSS_REVALIDATE_SECONDS = 20 * 60;
-
-const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 const unwrapCdata = (value: string) => value
   .replace(/^\s*<!\[CDATA\[/, "")
@@ -46,29 +45,7 @@ const stableId = (value: string) => {
   return `bok-${hash.toString(36)}`;
 };
 
-const kstDateKey = (date: Date) => new Date(date.getTime() + KST_OFFSET_MS).toISOString().slice(0, 10);
-
-export function formatNewsPublishedAt(value: string, now = new Date()) {
-  const published = new Date(value);
-  if (Number.isNaN(published.getTime())) return "날짜 미상";
-
-  const differenceMinutes = Math.floor((now.getTime() - published.getTime()) / 60_000);
-  const publishedDay = kstDateKey(published);
-  const currentDay = kstDateKey(now);
-
-  if (differenceMinutes < 0) return publishedDay === currentDay ? "오늘" : publishedDay.replaceAll("-", ".");
-  if (differenceMinutes < 1) return "방금 전";
-  if (differenceMinutes < 60) return `${differenceMinutes}분 전`;
-  if (differenceMinutes < 6 * 60) return `${Math.floor(differenceMinutes / 60)}시간 전`;
-  if (publishedDay === currentDay) return "오늘";
-
-  const dayDifference = Math.round(
-    (Date.parse(`${currentDay}T00:00:00Z`) - Date.parse(`${publishedDay}T00:00:00Z`)) / DAY_MS,
-  );
-  if (dayDifference === 1) return "어제";
-  if (dayDifference > 1 && dayDifference < 7) return `${dayDifference}일 전`;
-  return publishedDay.replaceAll("-", ".");
-}
+export { formatNewsPublishedAt } from "@/lib/news/normalize";
 
 const categorizeBokNews = (title: string, description: string) => {
   const text = `${title} ${description}`;
@@ -94,26 +71,26 @@ export function parseBokRss(xml: string, now = new Date()): NewsItem[] {
 
       if (!title || !sourceUrl || !publishedAtRaw) return null;
 
-      return {
+      return toNewsItem({
         id: stableId(sourceUrl),
         title,
         originalTitle: title,
-        summary: description || `${title} 관련 한국은행 공식 자료입니다.`,
+        publisher: "한국은행",
         description,
-        source: "한국은행",
-        sourceUrl,
-        thumbnail: null,
-        category,
-        publishedAt: formatNewsPublishedAt(publishedAtRaw, now),
         publishedAtRaw,
-        keywords: [category, "한국은행"],
-        contentType: "news",
+        publishedAt: formatNewsPublishedAt(publishedAtRaw, now),
+        originalUrl: sourceUrl,
+        thumbnailUrl: null,
+        category,
+        sourceType: "official",
         dataSource: "bok-rss",
+        summary: description || `${title} 관련 한국은행 공식 자료입니다.`,
+        keywords: [category, "한국은행"],
         relatedMarketIds: [],
-      } satisfies NewsItem;
+      });
     })
     .filter((item): item is NewsItem => item !== null)
-    .sort((a, b) => new Date(b.publishedAtRaw ?? 0).getTime() - new Date(a.publishedAtRaw ?? 0).getTime());
+    .sort((a, b) => new Date(b.publishedAtRaw).getTime() - new Date(a.publishedAtRaw).getTime());
 }
 
 export async function fetchBokNews(): Promise<NewsItem[]> {
@@ -129,3 +106,10 @@ export async function fetchBokNews(): Promise<NewsItem[]> {
   if (!items.length) throw new Error("한국은행 RSS에서 유효한 뉴스 항목을 찾지 못했습니다.");
   return items;
 }
+
+export const bokNewsProvider: NewsProvider = {
+  id: "bok-rss",
+  sourceType: "official",
+  isConfigured: () => true,
+  fetch: async (limit) => (await fetchBokNews()).slice(0, limit),
+};

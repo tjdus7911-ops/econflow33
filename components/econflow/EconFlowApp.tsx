@@ -116,7 +116,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
 
     const loadHomeNews = async () => {
       try {
-        const response = await fetch("/api/news", {
+        const response = await fetch("/api/news?limit=3", {
           headers: { Accept: "application/json" },
           signal: controller.signal,
         });
@@ -158,8 +158,8 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
   const openIssue = (id: string) => { setIssueId(id); go("issue-detail", `/issues/${id}`); };
   const openNews = (id: string) => { setNewsId(id); go("news-detail", `/news/${id}`); };
   const openHomeNews = (item: NewsItem) => {
-    if (item.dataSource === "bok-rss" && item.sourceUrl.startsWith("https://www.bok.or.kr/")) {
-      window.open(item.sourceUrl, "_blank", "noopener,noreferrer");
+    if (item.sourceType !== "mock" && /^https?:\/\//.test(item.originalUrl)) {
+      window.open(item.originalUrl, "_blank", "noopener,noreferrer");
       return;
     }
     openNews(item.id);

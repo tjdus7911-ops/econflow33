@@ -1,4 +1,5 @@
 import type { NewsItem } from "@/data/news";
+import { formatNewsPublishedAt, toNewsItem } from "@/lib/news/normalize";
 
 type NaverNewsResponse = {
   items: {
@@ -31,20 +32,21 @@ export function normalizeNaverNewsItem(item: NaverNewsResponse["items"][number],
   const originalTitle = stripHtml(item.title);
   const description = stripHtml(item.description);
 
-  return {
+  return toNewsItem({
     id: stableId(sourceUrl),
     title: originalTitle,
     originalTitle,
-    summary: description,
+    publisher: hostname,
     description,
-    source: hostname,
-    sourceUrl,
+    publishedAtRaw: item.pubDate,
+    publishedAt: formatNewsPublishedAt(item.pubDate),
+    originalUrl: sourceUrl,
+    thumbnailUrl: null,
     category: "주요",
-    publishedAt: new Date(item.pubDate).toISOString(),
+    sourceType: "news-api",
+    dataSource: "naver",
     keywords,
-    contentType: "news",
-    relatedMarketIds: [],
-  };
+  });
 }
 
 export const isNaverNewsConfigured = () => Boolean(process.env.NAVER_CLIENT_ID && process.env.NAVER_CLIENT_SECRET);

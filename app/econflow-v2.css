@@ -916,15 +916,15 @@ button { color: inherit; }
   margin: 0 -2px -5px -5px;
 }
 .home-content .news-card.compact {
-  min-height: 80px;
+  min-height: 82px;
   padding: 0;
   border-bottom-color: #edf1f6;
 }
 .home-content .news-card.compact .news-card-main {
   grid-template-columns: 64px minmax(0, 1fr);
   gap: 12px;
-  min-height: 80px;
-  padding: 8px 36px 8px 0;
+  min-height: 82px;
+  padding: 9px 36px 9px 0;
 }
 .home-content .news-card.compact .news-thumb {
   width: 64px;
@@ -936,7 +936,7 @@ button { color: inherit; }
 .home-content .news-card.compact .news-copy > strong {
   font-size: .875rem;
   line-height: 1.4;
-  font-weight: 680;
+  font-weight: 700;
   letter-spacing: -.02em;
 }
 .home-content .news-card.compact .news-meta {
