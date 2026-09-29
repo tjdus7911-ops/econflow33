@@ -18,6 +18,24 @@
   --ef-radius-md: 16px;
   --ef-radius-lg: 22px;
   --ef-space: 18px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 20px;
+  --space-xl: 30px;
+  --text-caption: .75rem;
+  --text-body: .8125rem;
+  --text-card-title: .875rem;
+  --text-section-title: 1.125rem;
+  --text-page-title: 1.3125rem;
+  --radius-sm: 12px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --color-primary: #2477f3;
+  --color-text-primary: #10233f;
+  --color-text-secondary: #66758c;
+  --color-border: #e7edf5;
+  --color-surface-blue: #eef6ff;
   --background: #f3f6fa;
   --foreground: var(--ef-text);
   --primary: var(--ef-blue);
@@ -746,6 +764,213 @@ button { color: inherit; }
   .industry-grid { grid-template-columns: repeat(2, 1fr); }
   .news-card-main { grid-template-columns: 78px minmax(0, 1fr); }
   .news-thumb { width: 78px; height: 66px; }
+}
+
+/* Home visual polish — final mobile reference */
+.phone-shell:has(.home-content) > .app-header {
+  height: 62px;
+  padding-inline: var(--space-lg);
+}
+.phone-shell:has(.home-content) > .app-header .brand {
+  font-size: 1.3125rem;
+  line-height: 1.2;
+  font-weight: 800;
+}
+.home-content {
+  padding: 0 var(--space-lg) calc(88px + env(safe-area-inset-bottom));
+}
+.home-briefing {
+  grid-template-columns: minmax(0, 1fr) 104px;
+  align-items: center;
+  min-height: 136px;
+  padding: 8px 0 4px;
+}
+.home-briefing-copy { align-self: center; }
+.today-label {
+  font-size: var(--text-caption);
+  line-height: 1.3;
+  font-weight: 700;
+}
+.home-briefing h1 {
+  margin: 10px 0 7px;
+  font-size: var(--text-page-title);
+  line-height: 1.3;
+  font-weight: 800;
+  letter-spacing: -.04em;
+}
+.home-briefing p {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body);
+  line-height: 1.5;
+  font-weight: 450;
+}
+.home-briefing .character {
+  width: 102px;
+  height: 102px;
+  align-self: end;
+  margin: 0 -2px 2px 0;
+}
+.home-content .section-block.roomy { margin-top: 28px; }
+.home-content .section-heading {
+  margin-bottom: 13px;
+  align-items: end;
+}
+.home-content .section-kicker {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-size: .71875rem;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.home-content .section-heading h2 {
+  font-size: var(--text-section-title);
+  line-height: 1.35;
+  font-weight: 800;
+  letter-spacing: -.03em;
+}
+.home-content .text-button {
+  padding-bottom: 2px;
+  font-size: var(--text-caption);
+  line-height: 1.3;
+  font-weight: 500;
+}
+.home-issue-grid { gap: var(--space-sm); }
+.home-issue-grid .issue-card {
+  display: flex;
+  min-width: 0;
+  height: 112px;
+  min-height: 112px;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 13px 11px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #fff;
+}
+.home-issue-grid .issue-card > span {
+  font-size: .6875rem;
+  line-height: 1.3;
+  font-weight: 500;
+}
+.home-issue-grid .issue-card strong {
+  display: -webkit-box;
+  min-height: 0;
+  margin-top: var(--space-xs);
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: var(--text-card-title);
+  line-height: 1.35;
+  font-weight: 700;
+}
+.home-issue-grid .issue-card .metric {
+  margin-top: auto;
+  font-size: .75rem;
+  line-height: 1.2;
+  font-weight: 650;
+}
+.home-issue-grid .issue-card .metric svg { width: 14px; height: 14px; }
+.home-content .daily-story {
+  grid-template-columns: minmax(0, 1fr) 94px;
+  min-height: 208px;
+  padding: 15px 6px 15px 18px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-blue);
+}
+.home-content .story-label {
+  font-size: .75rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+.home-content .story-time {
+  margin-top: 6px;
+  font-size: .71875rem;
+  line-height: 1.3;
+  font-weight: 500;
+}
+.home-content .daily-story h2 {
+  margin: 6px 0 4px;
+  font-size: 1.09375rem;
+  line-height: 1.4;
+  font-weight: 800;
+  letter-spacing: -.03em;
+}
+.home-content .daily-story p {
+  margin: 0 0 8px;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body);
+  line-height: 1.55;
+  font-weight: 450;
+}
+.home-content .daily-story .primary-button {
+  min-height: 40px;
+  height: 40px;
+  padding-inline: 16px;
+  border-radius: var(--radius-sm);
+}
+.home-content .daily-story .character {
+  width: 90px;
+  height: 90px;
+  align-self: end;
+  margin: 0 -2px -5px -5px;
+}
+.home-content .news-card.compact {
+  min-height: 80px;
+  padding: 0;
+  border-bottom-color: #edf1f6;
+}
+.home-content .news-card.compact .news-card-main {
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 12px;
+  min-height: 80px;
+  padding: 8px 36px 8px 0;
+}
+.home-content .news-card.compact .news-thumb {
+  width: 64px;
+  height: 64px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+}
+.home-content .news-card.compact .news-copy { gap: 5px; }
+.home-content .news-card.compact .news-copy > strong {
+  font-size: .875rem;
+  line-height: 1.4;
+  font-weight: 680;
+  letter-spacing: -.02em;
+}
+.home-content .news-card.compact .news-meta {
+  font-size: .71875rem;
+  line-height: 1.3;
+  font-weight: 450;
+}
+.home-content .news-card.compact .news-bookmark {
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+}
+.home-content .home-learning-card {
+  grid-template-columns: minmax(0, 1fr) 106px;
+  min-height: 178px;
+  padding: 17px 5px 16px 18px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-blue);
+}
+.home-content .home-learning-card > div:first-child > span { font-size: .75rem; line-height: 1.3; }
+.home-content .home-learning-card h2 { font-size: 1.0625rem; line-height: 1.4; }
+.home-content .home-learning-card p { font-size: .75rem; line-height: 1.35; }
+.home-content .home-learning-card .primary-button { min-height: 40px; height: 40px; padding-inline: 16px; border-radius: var(--radius-sm); }
+.home-content .home-learning-card .character { width: 104px; height: 104px; margin: 0 -3px -8px -7px; }
+
+@media (max-width: 375px) {
+  .phone-shell:has(.home-content) > .app-header { padding-inline: var(--space-lg); }
+  .home-content { padding-inline: var(--space-lg); }
+  .home-briefing { grid-template-columns: minmax(0, 1fr) 98px; padding: 8px 0 4px; }
+  .home-briefing h1 { font-size: 1.25rem; }
+  .home-briefing p { font-size: .78125rem; }
+  .home-briefing .character { width: 96px; height: 96px; }
+  .home-content .daily-story { grid-template-columns: minmax(0, 1fr) 88px; padding-left: 17px; }
+  .home-content .daily-story .character { width: 88px; height: 88px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
