@@ -171,7 +171,7 @@ export function FeaturedNewsCard({ item, onClick, bookmarked = false, onBookmark
   );
 }
 
-export function NewsCard({ item, compact = false, onClick, bookmarked = false, onBookmark }: { item: NewsItem; compact?: boolean; onClick: () => void; bookmarked?: boolean; onBookmark?: () => void }) {
+export function NewsCard({ item, compact = false, onClick, bookmarked = false, onBookmark, showSource = false }: { item: NewsItem; compact?: boolean; onClick: () => void; bookmarked?: boolean; onBookmark?: () => void; showSource?: boolean }) {
   const thumbnail = item.imageUrl || item.thumbnail || fallbackNewsThumbnail(item);
   return (
     <article className={`news-card${compact ? " compact" : ""}`} data-category={item.category}>
@@ -180,7 +180,7 @@ export function NewsCard({ item, compact = false, onClick, bookmarked = false, o
         <span className="news-copy">
           <strong>{item.title}</strong>
           {!compact ? <span className="news-summary">{item.summary}</span> : null}
-          <span className="news-meta"><b>{item.category}</b><span>{item.publishedAt}</span></span>
+          <span className="news-meta"><b>{showSource ? item.source : item.category}</b><span>{item.publishedAt}</span></span>
         </span>
       </button>
       <button className={`news-bookmark${bookmarked ? " saved" : ""}`} onClick={onBookmark} aria-label={bookmarked ? "북마크 해제" : "북마크 저장"}><Bookmark aria-hidden="true" /></button>

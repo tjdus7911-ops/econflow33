@@ -6,12 +6,14 @@ export type NewsItem = {
   description: string;
   source: string;
   sourceUrl: string;
-  imageUrl?: string;
-  thumbnail?: string;
+  imageUrl?: string | null;
+  thumbnail?: string | null;
   category: string;
   publishedAt: string;
+  publishedAtRaw?: string;
   keywords: string[];
   contentType: "news" | "briefing";
+  dataSource?: "mock" | "bok-rss" | "naver";
   relatedIssueId?: string;
   relatedMarketIds: string[];
   relatedLessonId?: string;

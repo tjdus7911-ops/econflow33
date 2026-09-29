@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -31,7 +31,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { issues, issueCategories } from "@/data/issues";
-import { news } from "@/data/news";
+import { news, type NewsItem } from "@/data/news";
 import { lessons } from "@/data/lessons";
 import { marketCategories, marketIndicators, marketSummary, type MarketCategory, type MarketPeriod } from "@/data/market";
 import { quiz } from "@/data/quiz";
@@ -81,6 +81,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
   const [view, setView] = useState<EconFlowView>(initialView);
   const [issueId, setIssueId] = useState(initialView === "issue-detail" && initialId ? initialId : issues[0].id);
   const [newsId, setNewsId] = useState(initialView === "news-detail" && initialId ? initialId : news[0].id);
+  const [homeNews, setHomeNews] = useState<NewsItem[]>(() => news.slice(0, 3));
   const [lessonId, setLessonId] = useState(initialView === "lesson" && initialId ? initialId : lessons[0].id);
   const [marketId, setMarketId] = useState(initialView === "market-detail" && initialId ? initialId : marketIndicators[0].id);
   const [issueFilter, setIssueFilter] = useState("전체");
@@ -108,6 +109,31 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
     if (initialView === "market-detail" && initialId) setMarketId(initialId);
   }
 
+  useEffect(() => {
+    if (view !== "home") return;
+
+    const controller = new AbortController();
+
+    const loadHomeNews = async () => {
+      try {
+        const response = await fetch("/api/news", {
+          headers: { Accept: "application/json" },
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error(`뉴스 API 요청 실패: ${response.status}`);
+
+        const payload = await response.json() as { items?: NewsItem[] };
+        if (payload.items?.length) setHomeNews(payload.items.slice(0, 3));
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setHomeNews(news.slice(0, 3));
+      }
+    };
+
+    void loadHomeNews();
+    return () => controller.abort();
+  }, [view]);
+
   const activeTab: MainTab | null = view === "news" || view === "news-detail" ? "news" : view === "research" ? "research" : view === "market" || view === "market-detail" ? "market" : view === "profile" ? "profile" : view === "home" || view === "issues" || view === "issue-detail" ? "home" : null;
 
   const go = (next: EconFlowView, path: string) => {
@@ -131,6 +157,13 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
 
   const openIssue = (id: string) => { setIssueId(id); go("issue-detail", `/issues/${id}`); };
   const openNews = (id: string) => { setNewsId(id); go("news-detail", `/news/${id}`); };
+  const openHomeNews = (item: NewsItem) => {
+    if (item.dataSource === "bok-rss" && item.sourceUrl.startsWith("https://www.bok.or.kr/")) {
+      window.open(item.sourceUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
+    openNews(item.id);
+  };
   const openLesson = (id: string) => { setLessonId(id); go("lesson", `/study/${id}`); };
   const openMarket = (id: string) => { setMarketId(id); setMarketPeriod("1m"); go("market-detail", `/market/${id}`); };
   const toggleBookmark = (id: string) => setSavedNewsIds((current) => {
@@ -192,7 +225,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
         <section className="section-block roomy">
           <SectionHeader title="지금 뜨는 경제 뉴스" onAction={() => navigateTab("news")} />
           <div className="news-list">
-            {news.slice(0, 3).map((item) => <NewsCard key={item.id} item={item} compact bookmarked={savedNewsIds.has(item.id)} onBookmark={() => toggleBookmark(item.id)} onClick={() => openNews(item.id)} />)}
+            {homeNews.map((item) => <NewsCard key={item.id} item={item} compact showSource bookmarked={savedNewsIds.has(item.id)} onBookmark={() => toggleBookmark(item.id)} onClick={() => openHomeNews(item)} />)}
           </div>
         </section>
 
