@@ -84,7 +84,7 @@ export function DailyStory({ issue, onSelect }: { issue: Issue; onSelect: () => 
         <p>{issue.summary}</p>
         <PrimaryButton onClick={onSelect}>지금 이해하기 <ChevronRight aria-hidden="true" /></PrimaryButton>
       </div>
-      <Character pose="default" size="lg" />
+      <Character pose="discover" size="lg" />
     </section>
   );
 }

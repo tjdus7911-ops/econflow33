@@ -209,7 +209,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
             <h1>서연님,<br />오늘도 좋은 하루예요! <span aria-hidden="true">👋</span></h1>
             <p>오늘 시장은 금리 인하 기대감으로<br />기술주 중심의 상승 흐름이에요.</p>
           </div>
-          <Character pose="default" size="lg" />
+          <Character pose="observer" size="lg" />
         </section>
 
         <section className="section-block roomy">
