@@ -108,7 +108,7 @@ const CHARACTER_LABELS: Record<CharacterPose, string> = {
   joy: "기뻐하는 돈똑이",
   study: "책을 읽으며 공부하는 돈똑이",
   analyze: "데이터를 분석하는 돈똑이",
-  start: "EconFlow를 시작하는 돈똑이",
+  start: "Jester를 시작하는 돈똑이",
   basic: "돈똑이 기본 표정",
   wink: "윙크하는 돈똑이",
   surprise: "새로운 경제 현상에 놀란 돈똑이",

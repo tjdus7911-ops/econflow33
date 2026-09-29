@@ -982,103 +982,103 @@ button { color: inherit; }
   .home-content .daily-story .character { width: 88px; height: 88px; }
 }
 
-/* Home dark theme — scoped to HOME so data screens and providers stay untouched. */
-.home-dark-canvas {
+/* Jester dark theme foundation shared by every route. */
+.app-dark-canvas {
   background: #080d12;
 }
 
-.home-dark-shell {
-  --home-dark-background: #080d12;
-  --home-dark-surface: #101822;
-  --home-dark-card: #111c27;
-  --home-dark-card-raised: #162333;
-  --home-dark-border: #223142;
-  --home-dark-text: #f7f9fc;
-  --home-dark-text-secondary: #94a1b2;
-  --home-dark-text-tertiary: #687789;
-  color: var(--home-dark-text);
-  background: var(--home-dark-background);
+.app-dark-shell {
+  --app-dark-background: #080d12;
+  --app-dark-surface: #101822;
+  --app-dark-card: #111c27;
+  --app-dark-card-raised: #162333;
+  --app-dark-border: #223142;
+  --app-dark-text: #f7f9fc;
+  --app-dark-text-secondary: #94a1b2;
+  --app-dark-text-tertiary: #687789;
+  color: var(--app-dark-text);
+  background: var(--app-dark-background);
   box-shadow: 0 18px 60px rgba(0, 0, 0, .24);
 }
 
-.home-dark-shell > .app-header {
+.app-dark-shell > .app-header {
   background: rgba(8, 13, 18, .96);
-  color: var(--home-dark-text);
+  color: var(--app-dark-text);
   backdrop-filter: blur(18px);
 }
-.home-dark-shell > .app-header .brand { color: var(--home-dark-text); }
-.home-dark-shell > .app-header .brand span { color: var(--ef-blue); }
-.home-dark-shell > .app-header .icon-button { color: #d8e4f2; }
-.home-dark-shell > .app-header .icon-button:hover { background: var(--home-dark-surface); }
+.app-dark-shell > .app-header .brand { color: var(--app-dark-text); }
+.app-dark-shell > .app-header .brand span { color: var(--ef-blue); }
+.app-dark-shell > .app-header .icon-button { color: #d8e4f2; }
+.app-dark-shell > .app-header .icon-button:hover { background: var(--app-dark-surface); }
 
-.home-dark-shell .home-content {
-  color: var(--home-dark-text);
-  background: var(--home-dark-background);
+.app-dark-shell .home-content {
+  color: var(--app-dark-text);
+  background: var(--app-dark-background);
 }
-.home-dark-shell .inline-notice {
-  border: 1px solid var(--home-dark-border);
-  background: var(--home-dark-surface);
+.app-dark-shell .inline-notice {
+  border: 1px solid var(--app-dark-border);
+  background: var(--app-dark-surface);
   color: #bdd7ff;
 }
 
-.home-dark-shell .home-briefing {
+.app-dark-shell .home-briefing {
   overflow: visible;
 }
-.home-dark-shell .today-label { color: var(--ef-blue); }
-.home-dark-shell .home-briefing h1,
-.home-dark-shell .section-heading h2,
-.home-dark-shell .home-issue-grid .issue-card strong,
-.home-dark-shell .daily-story h2,
-.home-dark-shell .news-copy > strong,
-.home-dark-shell .home-learning-card h2 {
-  color: var(--home-dark-text);
+.app-dark-shell .today-label { color: var(--ef-blue); }
+.app-dark-shell .home-briefing h1,
+.app-dark-shell .section-heading h2,
+.app-dark-shell .home-issue-grid .issue-card strong,
+.app-dark-shell .daily-story h2,
+.app-dark-shell .news-copy > strong,
+.app-dark-shell .home-learning-card h2 {
+  color: var(--app-dark-text);
 }
-.home-dark-shell .home-briefing p { color: var(--home-dark-text-secondary); }
-.home-dark-shell .home-briefing .character {
+.app-dark-shell .home-briefing p { color: var(--app-dark-text-secondary); }
+.app-dark-shell .home-briefing .character {
   width: 86px;
   height: 86px;
   align-self: center;
   margin: 0;
   overflow: visible;
 }
-.home-dark-shell .character img {
+.app-dark-shell .character img {
   object-fit: contain;
   object-position: center bottom;
 }
 
-.home-dark-shell .section-kicker,
-.home-dark-shell .story-label,
-.home-dark-shell .home-learning-card > div:first-child > span,
-.home-dark-shell .news-meta b {
+.app-dark-shell .section-kicker,
+.app-dark-shell .story-label,
+.app-dark-shell .home-learning-card > div:first-child > span,
+.app-dark-shell .news-meta b {
   color: var(--ef-blue);
 }
-.home-dark-shell .text-button {
-  color: var(--home-dark-text-secondary);
+.app-dark-shell .text-button {
+  color: var(--app-dark-text-secondary);
 }
 
-.home-dark-shell .home-issue-grid .issue-card {
-  border-color: var(--home-dark-border);
-  background: var(--home-dark-card);
-  color: var(--home-dark-text);
+.app-dark-shell .home-issue-grid .issue-card {
+  border-color: var(--app-dark-border);
+  background: var(--app-dark-card);
+  color: var(--app-dark-text);
   box-shadow: none;
 }
-.home-dark-shell .home-issue-grid .issue-card > span {
-  color: var(--home-dark-text-secondary);
+.app-dark-shell .home-issue-grid .issue-card > span {
+  color: var(--app-dark-text-secondary);
 }
 
-.home-dark-shell .home-content .daily-story {
+.app-dark-shell .home-content .daily-story {
   grid-template-columns: minmax(0, 1fr) 88px;
   padding: 17px 12px 17px 18px;
   overflow: visible;
-  border: 1px solid var(--home-dark-border);
-  background: var(--home-dark-card-raised);
+  border: 1px solid var(--app-dark-border);
+  background: var(--app-dark-card-raised);
   box-shadow: none;
 }
-.home-dark-shell .home-content .story-time,
-.home-dark-shell .home-content .daily-story p {
-  color: var(--home-dark-text-secondary);
+.app-dark-shell .home-content .story-time,
+.app-dark-shell .home-content .daily-story p {
+  color: var(--app-dark-text-secondary);
 }
-.home-dark-shell .home-content .daily-story .character {
+.app-dark-shell .home-content .daily-story .character {
   width: 76px;
   height: 76px;
   align-self: end;
@@ -1087,33 +1087,33 @@ button { color: inherit; }
   overflow: visible;
 }
 
-.home-dark-shell .home-content .news-card.compact {
-  border-bottom-color: var(--home-dark-border);
+.app-dark-shell .home-content .news-card.compact {
+  border-bottom-color: var(--app-dark-border);
   background: transparent;
-  color: var(--home-dark-text);
+  color: var(--app-dark-text);
 }
-.home-dark-shell .home-content .news-card.compact .news-meta {
-  color: var(--home-dark-text-secondary);
+.app-dark-shell .home-content .news-card.compact .news-meta {
+  color: var(--app-dark-text-secondary);
 }
-.home-dark-shell .home-content .news-card.compact .news-bookmark {
-  color: var(--home-dark-text-tertiary);
+.app-dark-shell .home-content .news-card.compact .news-bookmark {
+  color: var(--app-dark-text-tertiary);
 }
-.home-dark-shell .home-content .news-card.compact .news-bookmark.saved {
+.app-dark-shell .home-content .news-card.compact .news-bookmark.saved {
   color: var(--ef-blue);
 }
 
-.home-dark-shell .home-content .home-learning-card {
+.app-dark-shell .home-content .home-learning-card {
   grid-template-columns: minmax(0, 1fr) 88px;
   padding: 17px 12px 17px 18px;
   overflow: visible;
-  border: 1px solid var(--home-dark-border);
-  background: var(--home-dark-card-raised);
+  border: 1px solid var(--app-dark-border);
+  background: var(--app-dark-card-raised);
   box-shadow: none;
 }
-.home-dark-shell .home-content .home-learning-card p {
-  color: var(--home-dark-text-secondary);
+.app-dark-shell .home-content .home-learning-card p {
+  color: var(--app-dark-text-secondary);
 }
-.home-dark-shell .home-content .home-learning-card .character {
+.app-dark-shell .home-content .home-learning-card .character {
   width: 76px;
   height: 76px;
   align-self: end;
@@ -1122,22 +1122,341 @@ button { color: inherit; }
   overflow: visible;
 }
 
-.home-dark-shell > .bottom-nav {
-  border-top-color: var(--home-dark-border);
+.app-dark-shell > .bottom-nav {
+  border-top-color: var(--app-dark-border);
   background: rgba(8, 13, 18, .97);
   box-shadow: none;
   backdrop-filter: blur(20px);
 }
-.home-dark-shell > .bottom-nav button { color: var(--home-dark-text-tertiary); }
-.home-dark-shell > .bottom-nav .active { color: var(--ef-blue); }
+.app-dark-shell > .bottom-nav button { color: var(--app-dark-text-tertiary); }
+.app-dark-shell > .bottom-nav .active { color: var(--ef-blue); }
 
 @media (max-width: 375px) {
-  .home-dark-shell .home-briefing { grid-template-columns: minmax(0, 1fr) 82px; }
-  .home-dark-shell .home-briefing .character { width: 80px; height: 80px; }
-  .home-dark-shell .home-content .daily-story,
-  .home-dark-shell .home-content .home-learning-card { grid-template-columns: minmax(0, 1fr) 80px; padding-right: 10px; }
-  .home-dark-shell .home-content .daily-story .character,
-  .home-dark-shell .home-content .home-learning-card .character { width: 72px; height: 72px; }
+  .app-dark-shell .home-briefing { grid-template-columns: minmax(0, 1fr) 82px; }
+  .app-dark-shell .home-briefing .character { width: 80px; height: 80px; }
+  .app-dark-shell .home-content .daily-story,
+  .app-dark-shell .home-content .home-learning-card { grid-template-columns: minmax(0, 1fr) 80px; padding-right: 10px; }
+  .app-dark-shell .home-content .daily-story .character,
+  .app-dark-shell .home-content .home-learning-card .character { width: 72px; height: 72px; }
+}
+
+/* App-wide dark color system. Layout, type scale, spacing and mascot geometry stay unchanged. */
+:root {
+  color-scheme: dark;
+  --ef-navy: #0d315c;
+  --ef-navy-2: #162333;
+  --ef-blue-soft: #17283b;
+  --ef-blue-pale: #101822;
+  --ef-surface: #080d12;
+  --ef-surface-2: #111c27;
+  --ef-line: #223142;
+  --ef-text: #f7f9fc;
+  --ef-muted: #94a1b2;
+  --ef-subtle: #687789;
+  --color-text-primary: #f7f9fc;
+  --color-text-secondary: #94a1b2;
+  --color-border: #223142;
+  --color-surface-blue: #162333;
+  --background: #080d12;
+  --foreground: #f7f9fc;
+}
+
+html,
+body,
+.app-dark-canvas,
+.app-dark-shell,
+.app-dark-shell .screen-content {
+  background: #080d12;
+  color: var(--ef-text);
+}
+
+.app-header-brand {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding-inline: 20px;
+}
+.app-header-brand > .header-side:first-child { display: none; }
+.app-header-brand .brand { grid-column: 1; justify-self: start; margin: 0; }
+.app-header-brand .header-side.end { grid-column: 2; justify-self: end; }
+.app-dark-shell .brand { color: var(--ef-text); letter-spacing: -.045em; }
+.app-dark-shell .brand span { color: var(--ef-blue); }
+.app-dark-shell .header-title,
+.app-dark-shell .icon-button { color: #d8e4f2; }
+.app-dark-shell .home-briefing { background: transparent; }
+
+.app-dark-shell h1,
+.app-dark-shell h2,
+.app-dark-shell h3,
+.app-dark-shell strong,
+.app-dark-shell b { color: var(--ef-text); }
+.app-dark-shell p,
+.app-dark-shell small { color: var(--ef-muted); }
+.app-dark-shell input { color: var(--ef-text); caret-color: var(--ef-blue); }
+.app-dark-shell input::placeholder { color: var(--ef-subtle); }
+
+.app-dark-shell :is(
+  .issue-list-card,
+  .why-box,
+  .news-card,
+  .featured-news,
+  .learning-card,
+  .impact-card,
+  .concept-cta,
+  .ai-summary,
+  .context-card,
+  .source-box,
+  .lesson-cover,
+  .takeaway-card,
+  .completion-card,
+  .profile-card,
+  .profile-list,
+  .profile-identity,
+  .profile-shortcuts button,
+  .profile-settings-list button,
+  .ranking-list,
+  .ranking-item,
+  .reason-list,
+  .market-chart-card,
+  .market-indicator-card,
+  .market-link-card,
+  .market-data-state,
+  .search-field,
+  .category-chip,
+  .empty-state
+) {
+  border-color: var(--ef-line);
+  background: var(--ef-surface-2);
+  color: var(--ef-text);
+  box-shadow: none;
+}
+
+.app-dark-shell :is(
+  .daily-story,
+  .home-learning-card,
+  .study-mission,
+  .study-hero,
+  .news-guide,
+  .learning-stats,
+  .attendance-card,
+  .market-snapshot,
+  .market-explanation-card,
+  .research-search-panel,
+  .market-summary-v2,
+  .profile-level,
+  .profile-flow-banner,
+  .streak-card,
+  .cheer-banner
+) {
+  border-color: var(--ef-line);
+  background: var(--app-dark-card-raised);
+  color: var(--ef-text);
+  box-shadow: none;
+}
+
+.app-dark-shell :is(
+  .secondary-issues > button,
+  .report-list button,
+  .note-list button,
+  .market-index-row,
+  .market-theme-row,
+  .reason-list article
+) {
+  border-color: var(--ef-line);
+  background: transparent;
+  color: var(--ef-text);
+}
+
+.app-dark-shell :is(
+  .market-ticker,
+  .popular-lessons button,
+  .learning-category-grid button,
+  .company-grid > button,
+  .industry-grid button
+) {
+  border-color: var(--ef-line);
+  background: var(--ef-surface-2);
+  color: var(--ef-text);
+}
+
+.app-dark-shell :is(.category-chip, .period-tabs button, .market-segmented) {
+  border-color: var(--ef-line);
+  background: var(--app-dark-surface);
+  color: var(--ef-muted);
+}
+.app-dark-shell :is(.category-chip.selected, .period-tabs button.selected, .market-segmented button.selected) {
+  border-color: #315f99;
+  background: #173b68;
+  color: var(--ef-text);
+}
+
+.app-dark-shell :is(
+  .badge.blue,
+  .badge.soft,
+  .issue-rank,
+  .news-detail-icon,
+  .lesson-icon,
+  .popular-lesson-icon,
+  .report-icon,
+  .note-mark,
+  .market-theme-symbol,
+  .rank-number,
+  .term-button,
+  .content-type-label,
+  .profile-menu-icon,
+  .profile-shortcuts button > span,
+  .lesson-cover > svg
+) {
+  border-color: #294666;
+  background: #17283b;
+  color: #70aaff;
+  box-shadow: none;
+}
+
+.app-dark-shell .company-grid > button > span { background: #17283b; color: #70aaff; }
+.app-dark-shell .company-grid > button > span[data-tone="red"] { background: rgba(240, 82, 95, .14); color: #ff7b86; }
+.app-dark-shell .company-grid > button > span[data-tone="green"] { background: rgba(32, 165, 122, .14); color: #43c99d; }
+.app-dark-shell .company-grid > button > span[data-tone="yellow"] { background: rgba(227, 155, 33, .15); color: #f0bd54; }
+.app-dark-shell .company-grid > button > span[data-tone="navy"] { background: #17283b; color: #8dbbff; }
+
+.app-dark-shell :is(
+  .page-intro > p:last-child,
+  .issue-list-card > p,
+  .why-box span,
+  .news-summary,
+  .news-meta,
+  .results-label,
+  .detail-hero > p:last-of-type,
+  .reading-time,
+  .explain-section > p,
+  .impact-card p,
+  .concept-cta p,
+  .byline,
+  .ai-summary ul,
+  .context-card p,
+  .source-box span,
+  .study-mission p,
+  .study-hero p,
+  .lesson-copy > span:not(.lesson-meta):not(.duration),
+  .duration,
+  .lesson-cover p,
+  .lesson-cover span:last-child,
+  .lesson-section p,
+  .takeaway-card li,
+  .profile-card span,
+  .profile-card p,
+  .profile-identity p,
+  .profile-flow-banner p,
+  .market-snapshot p,
+  .market-summary-v2 p,
+  .market-card-top small,
+  .market-updated,
+  .market-link-card small,
+  .market-detail-hero > small,
+  .market-explanation-card p,
+  .reason-list p,
+  .research-search-panel p,
+  .report-list small,
+  .note-list small,
+  .research-empty,
+  .demo-label
+) { color: var(--ef-muted); }
+
+.app-dark-shell :is(
+  .section-kicker,
+  .eyebrow,
+  .detail-overline,
+  .step-number,
+  .story-label,
+  .news-meta b,
+  .lesson-meta,
+  .market-summary-copy h2,
+  .market-explanation-card > div > span,
+  .research-search-panel span,
+  .report-list em,
+  .profile-flow-banner strong,
+  .profile-level strong,
+  .card-link,
+  .source-box button
+) { color: var(--ef-blue); }
+
+.app-dark-shell .featured-news > .news-bookmark {
+  background: rgba(16, 24, 34, .9);
+  color: var(--ef-muted);
+}
+.app-dark-shell .news-card { background: transparent; }
+.app-dark-shell .news-bookmark { color: var(--ef-subtle); }
+.app-dark-shell .news-bookmark.saved { color: var(--ef-blue); }
+.app-dark-shell .primary-button.secondary { background: #223142; color: var(--ef-muted); }
+.app-dark-shell :is(.detail-hero, .market-detail-hero) { border-color: var(--ef-line); }
+.app-dark-shell :is(.learning-stats > div + div, .streak-card > div + div) { border-color: var(--ef-line); }
+.app-dark-shell .lesson-progress { background: #223142; }
+.app-dark-shell .profile-level-track { background: #223142; }
+.app-dark-shell .profile-level span { color: var(--ef-muted); }
+.app-dark-shell .mock-label { background: #17283b; color: var(--ef-muted); }
+
+.app-dark-shell .learning-category-grid button > span,
+.app-dark-shell .learning-category-grid button[data-tone="navy"] > span,
+.app-dark-shell .learning-category-grid button[data-tone="mint"] > span,
+.app-dark-shell .learning-category-grid button[data-tone="sky"] > span {
+  background: #17283b;
+  color: #70aaff;
+}
+.app-dark-shell .profile-shortcuts button:nth-child(n) > span,
+.app-dark-shell .profile-list button:nth-child(n) .profile-menu-icon {
+  background: #17283b;
+  color: #70aaff;
+}
+
+.app-dark-shell .quiz-card {
+  border-color: var(--ef-line);
+  background: #101c2b;
+  color: var(--ef-text);
+}
+.app-dark-shell .quiz-head > span,
+.app-dark-shell .quiz-options button > span { background: #17283b; color: #70aaff; }
+.app-dark-shell .quiz-head p { color: #70aaff; }
+.app-dark-shell .quiz-options button {
+  border-color: var(--ef-line);
+  background: var(--ef-surface-2);
+  color: #dce6f3;
+}
+.app-dark-shell .quiz-options button.selected { border-color: #4a83c8; background: rgba(36, 119, 243, .16); }
+.app-dark-shell .quiz-options button.correct { border-color: #3da984; background: rgba(32, 165, 122, .15); }
+.app-dark-shell .quiz-options button.wrong { border-color: #c85f69; background: rgba(240, 82, 95, .14); }
+.app-dark-shell .quiz-result { background: var(--ef-surface-2); }
+.app-dark-shell .quiz-result strong { color: #43c99d; }
+.app-dark-shell .quiz-result.retry strong { color: #ff7b86; }
+.app-dark-shell .quiz-card > .primary-button { background: var(--ef-blue); color: #fff; }
+.app-dark-shell .quiz-card > .primary-button.secondary { background: #223142; color: var(--ef-muted); }
+
+.app-dark-shell .remember-section .summary-card,
+.app-dark-shell .summary-card {
+  background: #101c2b;
+  color: var(--ef-text);
+}
+.app-dark-shell .summary-card span { color: #70aaff; }
+.app-dark-shell .term-tooltip { background: #162333; color: var(--ef-text); }
+
+.app-dark-shell :is(
+  .news-card[data-category="미국"] .news-thumb,
+  .news-card[data-category="테크"] .news-thumb,
+  .news-card[data-category="한국"] .news-thumb,
+  .news-card[data-category="주요"] .news-thumb,
+  .news-card[data-category="산업"] .news-thumb,
+  .news-card[data-category="글로벌"] .news-thumb
+) { background: #17283b; }
+
+@media (hover: hover) and (pointer: fine) {
+  .app-dark-shell :is(
+    .market-ticker,
+    .news-card,
+    .featured-news,
+    .learning-card,
+    .company-grid button,
+    .industry-grid button,
+    .issue-card,
+    .ranking-item,
+    .profile-list button
+  ):hover { background-color: #162333; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -44,6 +44,7 @@ import {
   EconomicTermTooltip,
   EmptyState,
   FeaturedNewsCard,
+  displayBrandName,
   IssueCard,
   LearningCard,
   NewsCard,
@@ -200,7 +201,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
 
   const renderHome = () => (
     <>
-      <AppHeader title="EconFlow" action="home" onSearch={() => navigateTab("news")} onAction={() => setNotice("새로운 알림이 없어요. 오늘의 브리핑은 모두 확인할 수 있어요.")} />
+      <AppHeader title="Jester" action="home" onSearch={() => navigateTab("news")} onAction={() => setNotice("새로운 알림이 없어요. 오늘의 브리핑은 모두 확인할 수 있어요.")} />
       <div className="screen-content home-content">
         {notice ? <div className="inline-notice"><BellRing aria-hidden="true" />{notice}</div> : null}
         <section className="home-briefing">
@@ -305,10 +306,10 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
           <div className="news-detail-icon"><Newspaper aria-hidden="true" /></div>
           <div className="news-label-row"><Badge tone="blue">{item.category}</Badge><span className={`content-type-label ${item.contentType}`}>{item.contentType === "briefing" ? "BRIEFING" : "NEWS"}</span></div>
           <h1>{item.title}</h1>
-          <div className="byline"><span>{item.source}</span><span>{item.publishedAt}</span></div>
-          <section className="ai-summary"><div className="ai-summary-head"><Sparkles aria-hidden="true" /><strong>EconFlow 한눈 요약</strong></div><p>{item.summary}</p><ul><li>지표 하나보다 최근 흐름을 함께 확인해요.</li><li>발표와 실제 정책 결정 사이에는 시간이 걸릴 수 있어요.</li><li>내 생활에서는 금리, 환율, 소비 비용의 변화를 살펴보세요.</li></ul></section>
+          <div className="byline"><span>{displayBrandName(item.source)}</span><span>{item.publishedAt}</span></div>
+          <section className="ai-summary"><div className="ai-summary-head"><Sparkles aria-hidden="true" /><strong>Jester 한눈 요약</strong></div><p>{item.summary}</p><ul><li>지표 하나보다 최근 흐름을 함께 확인해요.</li><li>발표와 실제 정책 결정 사이에는 시간이 걸릴 수 있어요.</li><li>내 생활에서는 금리, 환율, 소비 비용의 변화를 살펴보세요.</li></ul></section>
           <section className="context-card"><span>이 뉴스, 왜 중요할까요?</span><h2>시장의 기대가 먼저 움직이는 신호예요.</h2><p>경제 뉴스는 오늘의 숫자만 말하지 않아요. 앞으로의 정책과 기업 활동을 사람들이 어떻게 예상하는지도 보여줘요.</p></section>
-          <div className="source-box"><div><strong>{item.contentType === "briefing" ? "EconFlow 설명 콘텐츠" : "원문 뉴스 출처"}</strong><span>{item.contentType === "briefing" ? "뉴스와 시장 데이터를 바탕으로 쉽게 풀어쓴 MVP 브리핑이에요." : `${item.source}에서 제공한 외부 뉴스예요.`}</span></div><button onClick={() => setNotice(item.contentType === "briefing" ? "브리핑은 외부 기사가 아니라 EconFlow의 설명 콘텐츠예요." : "원문 링크에서 언론사 기사를 확인할 수 있어요.")}>출처 안내 <ChevronRight aria-hidden="true" /></button></div>
+          <div className="source-box"><div><strong>{item.contentType === "briefing" ? "Jester 설명 콘텐츠" : "원문 뉴스 출처"}</strong><span>{item.contentType === "briefing" ? "뉴스와 시장 데이터를 바탕으로 쉽게 풀어쓴 MVP 브리핑이에요." : `${displayBrandName(item.source)}에서 제공한 외부 뉴스예요.`}</span></div><button onClick={() => setNotice(item.contentType === "briefing" ? "브리핑은 외부 기사가 아니라 Jester의 설명 콘텐츠예요." : "원문 링크에서 언론사 기사를 확인할 수 있어요.")}>출처 안내 <ChevronRight aria-hidden="true" /></button></div>
           {notice ? <div className="inline-notice"><CheckCircle2 aria-hidden="true" />{notice}</div> : null}
           <section className="section-block roomy"><SectionHeader kicker="시장 연결" title="관련 시장 지표" /><div className="market-link-list">{relatedMarkets.map((indicator) => indicator ? <MarketLinkCard key={indicator.id} indicator={indicator} onClick={() => openMarket(indicator.id)} /> : null)}</div></section>
           <section className="section-block roomy"><SectionHeader kicker="관련 개념" title="뉴스를 더 잘 이해하려면" /><LearningCard lesson={relatedLesson} featured onClick={() => openLesson(relatedLesson.id)} /></section>
@@ -451,7 +452,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
       { icon: BellRing, title: "알림 설정", action: () => setNotice("알림 설정은 다음 MVP 단계에서 연결할 수 있어요.") },
       { icon: Settings, title: "앱 설정", action: () => setNotice("앱 설정은 다음 MVP 단계에서 연결할 수 있어요.") },
       { icon: CircleHelp, title: "고객센터", action: () => setNotice("고객센터는 다음 MVP 단계에서 연결할 수 있어요.") },
-      { icon: Info, title: "서비스 소개", action: () => setNotice("EconFlow는 경제 흐름을 쉽고 친근하게 설명하는 서비스예요.") },
+      { icon: Info, title: "서비스 소개", action: () => setNotice("Jester는 경제 흐름을 쉽고 친근하게 설명하는 서비스예요.") },
     ];
     return (
       <>
@@ -460,10 +461,10 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
           <section className="profile-identity"><Character size="sm" pose="basic" /><div><h1>서연님</h1><p>경제와 함께 성장하는 중이에요! <span aria-hidden="true">🌱</span></p></div><ChevronRight aria-hidden="true" /></section>
           <section className="profile-level"><div><strong>Lv.3</strong><span>320 / 500</span></div><div className="profile-level-track"><i /></div><span className="profile-level-badge"><Star aria-hidden="true" /></span></section>
           <section className="profile-shortcuts">{shortcuts.map((item) => { const Icon = item.icon; return <button key={item.title} onClick={item.action}><span><Icon aria-hidden="true" /></span><strong>{item.title}</strong><small>{item.value}</small></button>; })}</section>
-          <section className="profile-flow-banner"><div><strong>EconFlow와 함께</strong><p>경제 흐름을 더 쉽게 이해해보세요.</p></div><Character size="sm" pose="happy" /></section>
+          <section className="profile-flow-banner"><div><strong>Jester와 함께</strong><p>경제 흐름을 더 쉽게 이해해보세요.</p></div><Character size="sm" pose="happy" /></section>
           <div className="profile-settings-list">{menu.map((item) => { const Icon = item.icon; return <button key={item.title} onClick={item.action}><span className="profile-menu-icon"><Icon aria-hidden="true" /></span><strong>{item.title}</strong><ChevronRight aria-hidden="true" /></button>; })}</div>
           {notice ? <div className="inline-notice"><CheckCircle2 aria-hidden="true" />{notice}</div> : null}
-          <p className="demo-label">EconFlow MVP · 데모 콘텐츠</p>
+          <p className="demo-label">Jester MVP · 데모 콘텐츠</p>
         </div>
       </>
     );
@@ -471,11 +472,9 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
 
   const current = view === "home" ? renderHome() : view === "issues" ? renderIssues() : view === "issue-detail" ? renderIssueDetail() : view === "news" ? renderNews() : view === "news-detail" ? renderNewsDetail() : view === "study" ? renderStudy() : view === "lesson" ? renderLesson() : view === "research" ? renderResearch() : view === "market" ? renderMarket() : view === "market-detail" ? renderMarketDetail() : renderProfile();
 
-  const isHome = view === "home";
-
   return (
-    <main className={`app-canvas${isHome ? " home-dark-canvas" : ""}`}>
-      <div className={`phone-shell${isHome ? " home-dark-shell" : ""}`}>
+    <main className="app-canvas app-dark-canvas">
+      <div className="phone-shell app-dark-shell">
         {current}
         <BottomNavigation active={activeTab} onNavigate={navigateTab} />
       </div>

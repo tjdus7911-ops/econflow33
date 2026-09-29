@@ -35,6 +35,8 @@ export type { CharacterPose, CharacterSize } from "./Character";
 
 export type MainTab = "home" | "news" | "research" | "market" | "profile";
 
+export const displayBrandName = (value: string) => value.replaceAll("EconFlow", "Jester");
+
 export function AppHeader({
   title,
   onBack,
@@ -50,7 +52,7 @@ export function AppHeader({
 }) {
   const ActionIcon = action === "bell" ? Bell : action === "settings" ? Settings : action === "info" ? Info : Search;
   return (
-    <header className="app-header">
+    <header className={`app-header${!onBack && title === "Jester" ? " app-header-brand" : ""}`}>
       <div className="header-side">
         {onBack ? (
           <button className="icon-button subtle" onClick={onBack} aria-label="이전 화면">
@@ -58,7 +60,7 @@ export function AppHeader({
           </button>
         ) : null}
       </div>
-      <strong className={onBack ? "header-title centered" : "brand"}>{title === "EconFlow" ? <>Econ<span>Flow</span></> : title}</strong>
+      <strong className={onBack ? "header-title centered" : "brand"}>{title === "Jester" ? <><span>J</span>ester</> : title}</strong>
       <div className="header-side end">
         {action === "home" ? <>
           <button className="icon-button" onClick={onSearch} aria-label="검색"><Search aria-hidden="true" /></button>
@@ -180,7 +182,7 @@ export function NewsCard({ item, compact = false, onClick, bookmarked = false, o
         <span className="news-copy">
           <strong>{item.title}</strong>
           {!compact ? <span className="news-summary">{item.summary}</span> : null}
-          <span className="news-meta"><b>{showSource ? item.publisher : item.category}</b><span aria-hidden="true">·</span><span>{item.publishedAt}</span></span>
+          <span className="news-meta"><b>{showSource ? displayBrandName(item.publisher) : item.category}</b><span aria-hidden="true">·</span><span>{item.publishedAt}</span></span>
         </span>
       </button>
       <button className={`news-bookmark${bookmarked ? " saved" : ""}`} onClick={onBookmark} aria-label={bookmarked ? "북마크 해제" : "북마크 저장"}><Bookmark aria-hidden="true" /></button>

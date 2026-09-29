@@ -103,7 +103,7 @@ export function MarketLineChart({ values, direction }: { values: number[]; direc
   const points = linePoints(values, 320, 132, 12);
   return (
     <svg className="market-line-chart" viewBox="0 0 320 132" role="img" aria-label="선택 기간 시장 흐름 차트">
-      {[28, 66, 104].map((y) => <line key={y} x1="10" y1={y} x2="310" y2={y} stroke="#e8eef5" strokeWidth="1" />)}
+      {[28, 66, 104].map((y) => <line key={y} x1="10" y1={y} x2="310" y2={y} stroke="#223142" strokeWidth="1" />)}
       <polyline points={points} fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
