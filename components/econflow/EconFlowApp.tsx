@@ -57,7 +57,7 @@ import {
   type MainTab,
 } from "./primitives";
 import { MarketDataState, MarketIndexRow, MarketIndicatorCard, MarketLineChart, MarketLinkCard, MarketThemeRow, formatMarketValue } from "./market";
-import { HomeMarketFlowCard, MarketFlowDetail } from "./MarketFlow";
+import { MarketFlowDetail } from "./MarketFlow";
 import { DailyStory, HomeLearningCard, ResearchHub, StudyCategoryGrid, StudyMission } from "./dashboard";
 import { NewsDetailView, NewsExplainView, NewsMainView } from "./NewsExperience";
 import { useNewsInteractions } from "./useNewsInteractions";
@@ -263,12 +263,6 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
         <section className="section-block roomy">
           <SectionHeader title="오늘 꼭 알아야 할 이야기" onAction={() => go("issues", "/issues")} />
           <DailyStory issue={issues[0]} onSelect={() => openIssue(issues[0].id)} />
-        </section>
-
-        <section className="section-block roomy home-market-flow-section">
-          <SectionHeader title="오늘의 시장 흐름" actionLabel="흐름 자세히 보기" actionHref="/market-flow" />
-          <p className="home-market-flow-description">오늘 시장을 움직인 연결고리를 한눈에 살펴보세요.</p>
-          <HomeMarketFlowCard flow={todayMarketFlow} />
         </section>
 
         <section className="section-block roomy">
