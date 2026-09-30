@@ -33,7 +33,7 @@ import {
 import { issues, issueCategories } from "@/data/issues";
 import { news, type NewsItem } from "@/data/news";
 import { lessons } from "@/data/lessons";
-import { marketCategories, marketIndicators, marketSummary, type MarketCategory, type MarketPeriod } from "@/data/market";
+import { marketCategories, marketIndicators, type MarketPeriod } from "@/data/market";
 import { todayMarketFlow } from "@/data/market-flow";
 import { quiz } from "@/data/quiz";
 import { matchesNewsFeedCategory, type NewsFeedCategory } from "@/lib/news/experience";
@@ -56,7 +56,8 @@ import {
   SectionHeader,
   type MainTab,
 } from "./primitives";
-import { MarketDataState, MarketIndexRow, MarketIndicatorCard, MarketLineChart, MarketLinkCard, MarketThemeRow, formatMarketValue } from "./market";
+import { MarketLineChart, MarketLinkCard, formatMarketValue } from "./market";
+import { MarketExperience } from "./MarketExperience";
 import { MarketFlowDetail } from "./MarketFlow";
 import { DailyStory, HomeLearningCard, ResearchHub, StudyCategoryGrid, StudyMission } from "./dashboard";
 import { NewsDetailView, NewsExplainView, NewsMainView } from "./NewsExperience";
@@ -69,14 +70,6 @@ const tabToPath: Record<MainTab, string> = { home: "/", news: "/news", research:
 
 const studyCategories = ["추천", "기초", "시장", "기업", "투자전략"];
 const newsDisplayCategories: NewsFeedCategory[] = ["전체", "속보", "시장", "기업", "산업", "글로벌"];
-const marketViewCategories = [
-  { id: "kr-stock", label: "국내주식" },
-  { id: "us-stock", label: "미국주식" },
-  { id: "fx", label: "환율" },
-  { id: "rate", label: "금리" },
-  { id: "commodity", label: "원자재" },
-  { id: "bond", label: "채권" },
-] as const;
 const marketPeriods: { id: MarketPeriod; label: string }[] = [
   { id: "1w", label: "1주" },
   { id: "1m", label: "1개월" },
@@ -99,10 +92,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
   const [issueFilter, setIssueFilter] = useState("전체");
   const [newsFilter, setNewsFilter] = useState<NewsFeedCategory>("전체");
   const [learningFilter, setLearningFilter] = useState("추천");
-  const [marketFilter, setMarketFilter] = useState<"kr-stock" | "us-stock" | MarketCategory>("kr-stock");
   const [marketPeriod, setMarketPeriod] = useState<MarketPeriod>("1m");
-  const [indexRegion, setIndexRegion] = useState<"KR" | "US" | "OTHER">("KR");
-  const [themeMetric, setThemeMetric] = useState<"up" | "down" | "volume">("up");
   const [query, setQuery] = useState("");
   const [researchQuery, setResearchQuery] = useState("");
   const [savedNewsIds, setSavedNewsIds] = useState<Set<string>>(() => new Set());
@@ -225,20 +215,6 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
     const searchMatch = !query.trim() || `${item.title} ${item.summary} ${item.category}`.toLowerCase().includes(query.trim().toLowerCase());
     return categoryMatch && searchMatch;
   }), [liveNews, newsFilter, query]);
-  const filteredMarket = useMemo(() => marketIndicators.filter((item) => {
-    if (marketFilter === "kr-stock") return item.category === "stock" && item.country === "KR";
-    if (marketFilter === "us-stock") return item.category === "stock" && item.country === "US";
-    return item.category === marketFilter;
-  }), [marketFilter]);
-  const quickMarket = [...filteredMarket, ...marketIndicators.filter((indicator) => !filteredMarket.some((item) => item.id === indicator.id))].slice(0, 3);
-  const visibleIndices = marketIndicators.filter((indicator) => indexRegion === "KR"
-    ? indicator.category === "stock" && indicator.country === "KR"
-    : indexRegion === "US"
-      ? indicator.category === "stock" && indicator.country === "US"
-      : indicator.category !== "stock").slice(0, 4);
-  const visibleThemes = (themeMetric === "volume"
-    ? [...issues].sort((a, b) => b.articleVolume - a.articleVolume)
-    : issues.filter((issue) => issue.direction === themeMetric)).slice(0, 4);
   const todayLabel = new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric", weekday: "long" }).format(new Date());
 
   const renderHome = () => (
@@ -412,31 +388,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
   const renderMarket = () => (
     <>
       <AppHeader title="시장" action="home" onSearch={() => setNotice("시장 카테고리를 눌러 원하는 지표를 빠르게 확인해 보세요.")} onAction={() => setNotice("새로운 시장 알림이 없어요.")} />
-      <div className="screen-content page-content market-page">
-        {notice ? <div className="inline-notice"><Info aria-hidden="true" />{notice}</div> : null}
-        <div className="chip-scroller market-chips">{marketViewCategories.map((category) => <CategoryChip key={category.id} label={category.label} selected={marketFilter === category.id} onClick={() => setMarketFilter(category.id)} />)}</div>
-        <section className="section-block market-summary-section">
-          <SectionHeader title="시장 요약" actionLabel="전체보기" onAction={() => setNotice(`${marketSummary.updatedAt} 기준으로 정리한 흐름이에요.`)} />
-          <div className="market-summary-v2"><div><span>오늘의 시장 한눈에 보기</span><strong>{marketSummary.headline}</strong><p>{marketSummary.description}</p></div><Character size="sm" pose={marketSummary.characterPose} /></div>
-        </section>
-        <section className="market-quick-grid" aria-label="선택 카테고리 주요 지표">
-          {quickMarket.map((indicator) => <MarketIndicatorCard key={indicator.id} indicator={indicator} onClick={() => openMarket(indicator.id)} />)}
-        </section>
-        <section className="section-block market-list-section">
-          <SectionHeader title="주요 지수" onAction={() => setNotice("현재 제공 중인 지수를 지역별로 모아 보여드려요.")} />
-          <div className="market-segmented" aria-label="지수 지역 선택">
-            {([{"id":"KR","label":"국내"},{"id":"US","label":"미국"},{"id":"OTHER","label":"기타"}] as const).map((region) => <button key={region.id} className={indexRegion === region.id ? "selected" : ""} onClick={() => setIndexRegion(region.id)}>{region.label}</button>)}
-          </div>
-          {visibleIndices.length ? <div className="market-index-list">{visibleIndices.map((indicator) => <MarketIndexRow key={indicator.id} indicator={indicator} onClick={() => openMarket(indicator.id)} />)}</div> : <MarketDataState state="empty" />}
-        </section>
-        <section className="section-block market-list-section">
-          <SectionHeader title="주요 테마" onAction={() => go("issues", "/issues")} />
-          <div className="market-segmented" aria-label="테마 정렬 선택">
-            {([{"id":"up","label":"상승률"},{"id":"down","label":"하락률"},{"id":"volume","label":"거래량"}] as const).map((metric) => <button key={metric.id} className={themeMetric === metric.id ? "selected" : ""} onClick={() => setThemeMetric(metric.id)}>{metric.label}</button>)}
-          </div>
-          <div className="market-theme-list">{visibleThemes.map((issue) => { const indicator = marketIndicators.find((item) => issue.relatedMarketIds.includes(item.id)); return <MarketThemeRow key={issue.id} issue={issue} indicator={indicator} onClick={() => openIssue(issue.id)} />; })}</div>
-        </section>
-      </div>
+      <MarketExperience notice={notice} onNotice={setNotice} onOpenIndicator={openMarket} />
     </>
   );
 
