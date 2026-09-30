@@ -70,6 +70,7 @@ const tabToPath: Record<MainTab, string> = { home: "/", news: "/news", research:
 
 const studyCategories = ["추천", "기초", "시장", "기업", "투자전략"];
 const newsDisplayCategories: NewsFeedCategory[] = ["전체", "속보", "시장", "기업", "산업", "글로벌"];
+const HOME_NEWS_LIMIT = 5;
 const marketPeriods: { id: MarketPeriod; label: string }[] = [
   { id: "1w", label: "1주" },
   { id: "1m", label: "1개월" },
@@ -232,11 +233,6 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
         </section>
 
         <section className="section-block roomy">
-          <SectionHeader kicker="빠르게 훑어보기" title="오늘의 핵심 이슈" count={3} onAction={() => go("issues", "/issues")} />
-          <div className="home-issue-grid">{issues.slice(0, 3).map((issue) => <IssueCard key={issue.id} issue={issue} compact onClick={() => openIssue(issue.id)} />)}</div>
-        </section>
-
-        <section className="section-block roomy">
           <SectionHeader title="오늘 꼭 알아야 할 이야기" onAction={() => go("issues", "/issues")} />
           <DailyStory issue={issues[0]} onSelect={() => openIssue(issues[0].id)} />
         </section>
@@ -244,10 +240,10 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
         <section className="section-block roomy">
           <SectionHeader title="지금 뜨는 경제 뉴스" onAction={() => navigateTab("news")} />
           <div className="news-list">
-            {newsLoadState === "loading" ? <NewsLoadingList count={3} compact /> : null}
+            {newsLoadState === "loading" ? <NewsLoadingList count={HOME_NEWS_LIMIT} compact /> : null}
             {newsLoadState === "error" ? <NewsDataState state="error" onRetry={() => setNewsReloadKey((value) => value + 1)} /> : null}
             {newsLoadState === "empty" ? <NewsDataState state="empty" /> : null}
-            {newsLoadState === "ready" ? liveNews.slice(0, 3).map((item) => <NewsCard key={item.id} item={item} compact showSource bookmarked={savedNewsIds.has(item.id)} onBookmark={() => toggleBookmark(item.id)} onClick={() => openNews(item.id)} />) : null}
+            {newsLoadState === "ready" ? liveNews.slice(0, HOME_NEWS_LIMIT).map((item) => <NewsCard key={item.id} item={item} compact showSource bookmarked={savedNewsIds.has(item.id)} onBookmark={() => toggleBookmark(item.id)} onClick={() => openNews(item.id)} />) : null}
           </div>
         </section>
 
