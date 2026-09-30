@@ -1,54 +1,59 @@
-import { NextResponse } from "next/server";
 import { unstable_cache } from "next/cache";
-import { news as fallbackNews } from "@/data/news";
+import { NextResponse } from "next/server";
 import { aggregateNews } from "@/lib/news/aggregator";
-import { BOK_RSS_REVALIDATE_SECONDS, BOK_RSS_URL } from "@/lib/providers/bok-rss";
+import { NAVER_NEWS_REVALIDATE_SECONDS } from "@/lib/providers/naver-news";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const getCachedNews = unstable_cache(
   aggregateNews,
-  ["econflow-news-aggregator-v2"],
-  { revalidate: BOK_RSS_REVALIDATE_SECONDS },
+  ["jester-naver-api-hub-news-v1"],
+  { revalidate: NAVER_NEWS_REVALIDATE_SECONDS },
 );
+
+const safeMessage = (error: unknown) => error instanceof Error ? error.message : "뉴스를 불러오지 못했습니다.";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const parsedLimit = Number.parseInt(searchParams.get("limit") ?? "20", 10);
   const limit = Number.isFinite(parsedLimit) ? Math.min(Math.max(parsedLimit, 1), 20) : 20;
+  const includeThumbnails = searchParams.get("images") === "true";
 
   try {
-    const result = await getCachedNews(limit);
+    const result = await getCachedNews(limit, includeThumbnails);
     return NextResponse.json(
       {
         success: true,
         updatedAt: new Date().toISOString(),
         items: result.items,
+        count: result.items.length,
         providers: result.providers,
-        source: result.items[0]?.sourceType === "news-api" ? "뉴스 API + 한국은행 RSS" : "한국은행 보도자료(전체) RSS",
-        feedUrl: BOK_RSS_URL,
-        fallback: result.fallback,
+        source: "NAVER API HUB Search API",
+        fallback: false,
+        imageScrapingEnabled: result.thumbnailStats.enabled,
+        thumbnailStats: result.thumbnailStats,
       },
       {
         headers: {
-          "Cache-Control": `public, s-maxage=${BOK_RSS_REVALIDATE_SECONDS}, stale-while-revalidate=${BOK_RSS_REVALIDATE_SECONDS}`,
+          "Cache-Control": "public, s-maxage=" + NAVER_NEWS_REVALIDATE_SECONDS + ", stale-while-revalidate=" + NAVER_NEWS_REVALIDATE_SECONDS,
         },
       },
     );
   } catch (error) {
-    console.error("[api/news] 뉴스 Aggregator 처리 실패", error);
+    const message = safeMessage(error);
+    console.error("[api/news] NAVER API HUB 처리 실패:", message);
     return NextResponse.json(
       {
-        success: true,
+        success: false,
         updatedAt: new Date().toISOString(),
-        items: fallbackNews.slice(0, limit),
-        providers: [{ id: "mock", sourceType: "mock", configured: true, ok: true, count: Math.min(fallbackNews.length, limit) }],
-        source: "EconFlow Mock 뉴스",
-        feedUrl: BOK_RSS_URL,
-        fallback: true,
+        items: [],
+        count: 0,
+        source: "NAVER API HUB Search API",
+        fallback: false,
+        error: message,
       },
-      { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } },
+      { status: 502, headers: { "Cache-Control": "no-store" } },
     );
   }
 }

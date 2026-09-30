@@ -388,6 +388,78 @@ button { color: inherit; }
 .news-bookmark svg { width: 17px; height: 17px; }
 .news-bookmark.saved { color: var(--ef-blue); }
 .news-bookmark.saved svg { fill: currentColor; }
+.news-loading-list { display: grid; gap: 0; }
+.news-skeleton-featured {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--ef-surface-2);
+}
+.news-skeleton-featured span,
+.news-skeleton-thumb,
+.news-skeleton-copy i {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: var(--ef-line);
+}
+.news-skeleton-featured span { width: 100%; height: 100%; }
+.news-skeleton-row {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 96px;
+  border-bottom: 1px solid var(--ef-line);
+}
+.news-skeleton-row.compact { grid-template-columns: 64px minmax(0, 1fr); min-height: 82px; }
+.news-skeleton-thumb { width: 92px; height: 72px; border-radius: 12px; }
+.news-skeleton-row.compact .news-skeleton-thumb { width: 64px; height: 64px; }
+.news-skeleton-copy { display: grid; gap: 8px; }
+.news-skeleton-copy i { width: 92%; height: 10px; border-radius: 999px; }
+.news-skeleton-copy i:nth-child(2) { width: 72%; }
+.news-skeleton-copy i:nth-child(3) { width: 42%; height: 8px; }
+.news-skeleton-featured span::after,
+.news-skeleton-thumb::after,
+.news-skeleton-copy i::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
+  animation: news-skeleton-shimmer 1.4s infinite;
+}
+.news-data-state {
+  display: grid;
+  justify-items: start;
+  gap: 5px;
+  padding: 22px 18px;
+  border: 1px solid var(--ef-line);
+  border-radius: var(--ef-radius-lg);
+  background: var(--ef-surface-2);
+}
+.news-data-state strong { color: var(--ef-text); font-size: .88rem; }
+.news-data-state span { color: var(--ef-muted); font-size: .73rem; }
+.news-data-state button {
+  margin-top: 7px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--ef-blue);
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+@keyframes news-skeleton-shimmer { to { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) {
+  .news-skeleton-featured span::after,
+  .news-skeleton-thumb::after,
+  .news-skeleton-copy i::after { animation: none; }
+}
 
 /* Study */
 .learning-stats {

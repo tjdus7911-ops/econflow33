@@ -60,14 +60,16 @@ export function sortNewsByPublishedAt(items: NewsItem[]) {
 
 export function deduplicateNews(items: NewsItem[]) {
   const urls = new Set<string>();
-  const publisherTitles = new Set<string>();
+  const titles = new Set<string>();
 
   return items.filter((item) => {
-    const urlKey = normalizeUrl(item.originalUrl);
-    const titleKey = `${item.publisher.trim().toLocaleLowerCase("ko-KR")}|${normalizeNewsTitle(item.originalTitle || item.title)}`;
-    if ((urlKey && urls.has(urlKey)) || (titleKey && publisherTitles.has(titleKey))) return false;
-    if (urlKey) urls.add(urlKey);
-    if (titleKey) publisherTitles.add(titleKey);
+    const urlKeys = [item.originalLink, item.link, item.originalUrl]
+      .map(normalizeUrl)
+      .filter(Boolean);
+    const titleKey = normalizeNewsTitle(item.originalTitle || item.title);
+    if (urlKeys.some((key) => urls.has(key)) || (titleKey && titles.has(titleKey))) return false;
+    urlKeys.forEach((key) => urls.add(key));
+    if (titleKey) titles.add(titleKey);
     return true;
   });
 }
@@ -78,11 +80,15 @@ export function toNewsItem(
     "originalUrl" | "thumbnailUrl" | "category" | "sourceType" | "dataSource"
   > & Partial<Pick<NewsItem,
     "publishedAt" | "summary" | "keywords" | "contentType" | "relatedIssueId" |
-    "relatedMarketIds" | "relatedLessonId"
+    "relatedMarketIds" | "relatedLessonId" | "originalLink" | "link" | "pubDate" | "fetchedAt"
   >>,
 ): NewsItem {
   return {
     ...item,
+    originalLink: item.originalLink ?? item.originalUrl,
+    link: item.link ?? item.originalUrl,
+    pubDate: item.pubDate ?? item.publishedAtRaw,
+    fetchedAt: item.fetchedAt ?? new Date().toISOString(),
     publishedAt: item.publishedAt ?? formatNewsPublishedAt(item.publishedAtRaw),
     summary: item.summary ?? item.description,
     source: item.publisher,

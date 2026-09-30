@@ -154,18 +154,19 @@ const fallbackNewsThumbnail = (item: NewsItem) => {
 };
 
 export function FeaturedNewsCard({ item, onClick, bookmarked = false, onBookmark }: { item: NewsItem; onClick: () => void; bookmarked?: boolean; onBookmark?: () => void }) {
-  const thumbnail = item.thumbnailUrl || item.imageUrl || item.thumbnail || fallbackNewsThumbnail(item);
+  const fallbackThumbnail = fallbackNewsThumbnail(item);
+  const thumbnail = item.thumbnailUrl || item.imageUrl || item.thumbnail || fallbackThumbnail;
   return (
     <article className="featured-news" data-category={item.category}>
       <button className="featured-news-main" onClick={onClick}>
       <span className={`featured-news-visual tone-${item.category}`}>
-        <img src={thumbnail} alt="" />
+        <img src={thumbnail} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = fallbackThumbnail; }} />
       </span>
       <span className="featured-news-copy">
         <span className="news-label-row"><Badge tone="blue">{item.category}</Badge><span className={`content-type-label ${item.contentType}`}>{item.contentType === "briefing" ? "BRIEFING" : "NEWS"}</span></span>
         <strong>{item.title}</strong>
         <span>{item.summary}</span>
-        <small>{item.publishedAt}</small>
+        <small>{displayBrandName(item.publisher)} · {item.publishedAt}</small>
       </span>
       </button>
       <button className={`news-bookmark${bookmarked ? " saved" : ""}`} onClick={onBookmark} aria-label={bookmarked ? "북마크 해제" : "북마크 저장"}><Bookmark aria-hidden="true" /></button>
@@ -174,11 +175,12 @@ export function FeaturedNewsCard({ item, onClick, bookmarked = false, onBookmark
 }
 
 export function NewsCard({ item, compact = false, onClick, bookmarked = false, onBookmark, showSource = false }: { item: NewsItem; compact?: boolean; onClick: () => void; bookmarked?: boolean; onBookmark?: () => void; showSource?: boolean }) {
-  const thumbnail = item.thumbnailUrl || item.imageUrl || item.thumbnail || fallbackNewsThumbnail(item);
+  const fallbackThumbnail = fallbackNewsThumbnail(item);
+  const thumbnail = item.thumbnailUrl || item.imageUrl || item.thumbnail || fallbackThumbnail;
   return (
     <article className={`news-card${compact ? " compact" : ""}`} data-category={item.category}>
       <button className="news-card-main" onClick={onClick}>
-        <span className={`news-thumb tone-${item.category}`}><img src={thumbnail} alt="" /></span>
+        <span className={`news-thumb tone-${item.category}`}><img src={thumbnail} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = fallbackThumbnail; }} /></span>
         <span className="news-copy">
           <strong>{item.title}</strong>
           {!compact ? <span className="news-summary">{item.summary}</span> : null}
@@ -187,6 +189,38 @@ export function NewsCard({ item, compact = false, onClick, bookmarked = false, o
       </button>
       <button className={`news-bookmark${bookmarked ? " saved" : ""}`} onClick={onBookmark} aria-label={bookmarked ? "북마크 해제" : "북마크 저장"}><Bookmark aria-hidden="true" /></button>
     </article>
+  );
+}
+
+export function NewsLoadingList({ count = 3, compact = false, featured = false }: { count?: number; compact?: boolean; featured?: boolean }) {
+  const rowCount = Math.max(count - (featured ? 1 : 0), 0);
+  return (
+    <div className="news-loading-list" aria-label="뉴스를 불러오는 중" aria-busy="true">
+      {featured ? <div className="news-skeleton-featured"><span /></div> : null}
+      {Array.from({ length: rowCount }, (_, index) => (
+        <div className={"news-skeleton-row" + (compact ? " compact" : "")} key={index}>
+          <span className="news-skeleton-thumb" />
+          <span className="news-skeleton-copy"><i /><i /><i /></span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function NewsDataState({
+  state,
+  onRetry,
+}: {
+  state: "empty" | "error";
+  onRetry?: () => void;
+}) {
+  const isError = state === "error";
+  return (
+    <div className="news-data-state" role={isError ? "alert" : "status"}>
+      <strong>{isError ? "뉴스를 불러오지 못했어요" : "새로운 경제뉴스가 없어요"}</strong>
+      <span>{isError ? "잠시 후 다시 시도해 주세요." : "조금 뒤 다시 확인해 주세요."}</span>
+      {isError && onRetry ? <button type="button" onClick={onRetry}>다시 시도</button> : null}
+    </div>
   );
 }
 

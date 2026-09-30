@@ -6,6 +6,10 @@ export type NewsItem = {
   originalTitle: string;
   publisher: string;
   description: string;
+  originalLink: string;
+  link: string;
+  pubDate: string;
+  fetchedAt: string;
   publishedAt: string;
   publishedAtRaw: string;
   originalUrl: string;

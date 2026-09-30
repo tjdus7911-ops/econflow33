@@ -48,6 +48,8 @@ import {
   IssueCard,
   LearningCard,
   NewsCard,
+  NewsDataState,
+  NewsLoadingList,
   PrimaryButton,
   SectionHeader,
   type MainTab,
@@ -82,7 +84,9 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
   const [view, setView] = useState<EconFlowView>(initialView);
   const [issueId, setIssueId] = useState(initialView === "issue-detail" && initialId ? initialId : issues[0].id);
   const [newsId, setNewsId] = useState(initialView === "news-detail" && initialId ? initialId : news[0].id);
-  const [homeNews, setHomeNews] = useState<NewsItem[]>(() => news.slice(0, 3));
+  const [liveNews, setLiveNews] = useState<NewsItem[]>([]);
+  const [newsLoadState, setNewsLoadState] = useState<"loading" | "ready" | "empty" | "error">("loading");
+  const [newsReloadKey, setNewsReloadKey] = useState(0);
   const [lessonId, setLessonId] = useState(initialView === "lesson" && initialId ? initialId : lessons[0].id);
   const [marketId, setMarketId] = useState(initialView === "market-detail" && initialId ? initialId : marketIndicators[0].id);
   const [issueFilter, setIssueFilter] = useState("전체");
@@ -111,29 +115,44 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
   }
 
   useEffect(() => {
-    if (view !== "home") return;
+    if (view !== "home" && view !== "news") return;
 
     const controller = new AbortController();
 
-    const loadHomeNews = async () => {
+    const loadNews = async () => {
+      setNewsLoadState("loading");
       try {
-        const response = await fetch("/api/news?limit=3", {
+        const response = await fetch("/api/news?limit=20", {
           headers: { Accept: "application/json" },
           signal: controller.signal,
         });
-        if (!response.ok) throw new Error(`뉴스 API 요청 실패: ${response.status}`);
+        const payload = await response.json() as { items?: NewsItem[]; error?: string; imageScrapingEnabled?: boolean };
+        if (!response.ok) throw new Error(payload.error ?? "뉴스 API 요청 실패: " + response.status);
 
-        const payload = await response.json() as { items?: NewsItem[] };
-        if (payload.items?.length) setHomeNews(payload.items.slice(0, 3));
+        const items = payload.items ?? [];
+        setLiveNews(items);
+        setNewsLoadState(items.length ? "ready" : "empty");
+
+        if (items.length && payload.imageScrapingEnabled) {
+          const imageResponse = await fetch("/api/news?limit=20&images=true", {
+            headers: { Accept: "application/json" },
+            signal: controller.signal,
+          });
+          if (imageResponse.ok) {
+            const imagePayload = await imageResponse.json() as { items?: NewsItem[] };
+            if (imagePayload.items?.length) setLiveNews(imagePayload.items);
+          }
+        }
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") return;
-        setHomeNews(news.slice(0, 3));
+        setLiveNews([]);
+        setNewsLoadState("error");
       }
     };
 
-    void loadHomeNews();
+    void loadNews();
     return () => controller.abort();
-  }, [view]);
+  }, [view, newsReloadKey]);
 
   const activeTab: MainTab | null = view === "news" || view === "news-detail" ? "news" : view === "research" ? "research" : view === "market" || view === "market-detail" ? "market" : view === "profile" ? "profile" : view === "home" || view === "issues" || view === "issue-detail" ? "home" : null;
 
@@ -158,9 +177,10 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
 
   const openIssue = (id: string) => { setIssueId(id); go("issue-detail", `/issues/${id}`); };
   const openNews = (id: string) => { setNewsId(id); go("news-detail", `/news/${id}`); };
-  const openHomeNews = (item: NewsItem) => {
-    if (item.sourceType !== "mock" && /^https?:\/\//.test(item.originalUrl)) {
-      window.open(item.originalUrl, "_blank", "noopener,noreferrer");
+  const openArticle = (item: NewsItem) => {
+    const articleUrl = [item.originalLink, item.originalUrl, item.link].find((value) => /^https?:\/\//.test(value));
+    if (articleUrl) {
+      window.open(articleUrl, "_blank", "noopener,noreferrer");
       return;
     }
     openNews(item.id);
@@ -173,7 +193,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
     return next;
   });
 
-  const filteredNews = useMemo(() => news.filter((item) => {
+  const filteredNews = useMemo(() => liveNews.filter((item) => {
     const searchable = `${item.title} ${item.summary} ${item.category} ${item.keywords.join(" ")}`;
     const categoryMatch = newsFilter === "전체"
       || (newsFilter === "경제정책" && /금리|연준|물가|채권|한국은행/.test(searchable))
@@ -183,7 +203,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
       || (newsFilter === "환율" && /환율|달러|원화/.test(searchable));
     const searchMatch = !query.trim() || `${item.title} ${item.summary} ${item.category}`.toLowerCase().includes(query.trim().toLowerCase());
     return categoryMatch && searchMatch;
-  }), [newsFilter, query]);
+  }), [liveNews, newsFilter, query]);
   const filteredMarket = useMemo(() => marketIndicators.filter((item) => {
     if (marketFilter === "kr-stock") return item.category === "stock" && item.country === "KR";
     if (marketFilter === "us-stock") return item.category === "stock" && item.country === "US";
@@ -226,7 +246,10 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
         <section className="section-block roomy">
           <SectionHeader title="지금 뜨는 경제 뉴스" onAction={() => navigateTab("news")} />
           <div className="news-list">
-            {homeNews.map((item) => <NewsCard key={item.id} item={item} compact showSource bookmarked={savedNewsIds.has(item.id)} onBookmark={() => toggleBookmark(item.id)} onClick={() => openHomeNews(item)} />)}
+            {newsLoadState === "loading" ? <NewsLoadingList count={3} compact /> : null}
+            {newsLoadState === "error" ? <NewsDataState state="error" onRetry={() => setNewsReloadKey((value) => value + 1)} /> : null}
+            {newsLoadState === "empty" ? <NewsDataState state="empty" /> : null}
+            {newsLoadState === "ready" ? liveNews.slice(0, 3).map((item) => <NewsCard key={item.id} item={item} compact showSource bookmarked={savedNewsIds.has(item.id)} onBookmark={() => toggleBookmark(item.id)} onClick={() => openArticle(item)} />) : null}
           </div>
         </section>
 
@@ -289,8 +312,12 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
         <section className="news-guide" aria-label="경제 뉴스 안내"><div><span>오늘의 경제 뉴스</span><strong>돈똑이와 함께<br />중요한 흐름을 살펴봐요.</strong></div><Character pose="news" size="sm" alt="경제 뉴스를 살펴보는 돈똑이" /></section>
         <label className="search-field" htmlFor="news-search"><Search aria-hidden="true" /><input id="news-search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="뉴스와 경제 키워드 검색" /></label>
         <div className="chip-scroller">{newsDisplayCategories.map((category) => <CategoryChip key={category} label={category} selected={newsFilter === category} onClick={() => setNewsFilter(category)} />)}</div>
-        <div className="results-label"><span>오늘의 주요 뉴스 · {filteredNews.length}개</span><SlidersHorizontal aria-hidden="true" /></div>
-        {filteredNews.length ? <><FeaturedNewsCard item={filteredNews[0]} bookmarked={savedNewsIds.has(filteredNews[0].id)} onBookmark={() => toggleBookmark(filteredNews[0].id)} onClick={() => openNews(filteredNews[0].id)} /><div className="news-list wide">{filteredNews.slice(1).map((item) => <NewsCard key={item.id} item={item} bookmarked={savedNewsIds.has(item.id)} onBookmark={() => toggleBookmark(item.id)} onClick={() => openNews(item.id)} />)}</div></> : <EmptyState title="검색 결과가 없어요" description="다른 키워드나 카테고리로 찾아보세요." />}
+        <div className="results-label"><span>{newsLoadState === "loading" ? "오늘의 주요 뉴스를 불러오는 중" : "오늘의 주요 뉴스 · " + filteredNews.length + "개"}</span><SlidersHorizontal aria-hidden="true" /></div>
+        {newsLoadState === "loading" ? <NewsLoadingList count={5} featured /> : null}
+        {newsLoadState === "error" ? <NewsDataState state="error" onRetry={() => setNewsReloadKey((value) => value + 1)} /> : null}
+        {newsLoadState === "empty" ? <NewsDataState state="empty" /> : null}
+        {newsLoadState === "ready" && filteredNews.length ? <><FeaturedNewsCard item={filteredNews[0]} bookmarked={savedNewsIds.has(filteredNews[0].id)} onBookmark={() => toggleBookmark(filteredNews[0].id)} onClick={() => openArticle(filteredNews[0])} /><div className="news-list wide">{filteredNews.slice(1).map((item) => <NewsCard key={item.id} item={item} showSource bookmarked={savedNewsIds.has(item.id)} onBookmark={() => toggleBookmark(item.id)} onClick={() => openArticle(item)} />)}</div></> : null}
+        {newsLoadState === "ready" && !filteredNews.length ? <EmptyState title="검색 결과가 없어요" description="다른 키워드나 카테고리로 찾아보세요." /> : null}
       </div>
     </>
   );

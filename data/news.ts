@@ -3,7 +3,8 @@ import type { NewsItem } from "@/lib/news/types";
 export type { NewsItem } from "@/lib/news/types";
 
 type MockNewsSeed = Omit<NewsItem,
-  "publisher" | "publishedAtRaw" | "originalUrl" | "thumbnailUrl" | "sourceType" | "dataSource"
+  "publisher" | "publishedAtRaw" | "originalUrl" | "thumbnailUrl" | "sourceType" | "dataSource" |
+  "originalLink" | "link" | "pubDate" | "fetchedAt"
 >;
 
 const mockNewsSeed: MockNewsSeed[] = [
@@ -19,6 +20,10 @@ const mockNewsSeed: MockNewsSeed[] = [
 export const news: NewsItem[] = mockNewsSeed.map((item) => ({
   ...item,
   publisher: item.source,
+  originalLink: item.sourceUrl,
+  link: item.sourceUrl,
+  pubDate: "",
+  fetchedAt: "",
   publishedAtRaw: "",
   originalUrl: item.sourceUrl,
   thumbnailUrl: item.imageUrl ?? item.thumbnail ?? null,
