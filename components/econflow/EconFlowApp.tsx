@@ -34,6 +34,7 @@ import { issues, issueCategories } from "@/data/issues";
 import { news, type NewsItem } from "@/data/news";
 import { lessons } from "@/data/lessons";
 import { marketCategories, marketIndicators, marketSummary, type MarketCategory, type MarketPeriod } from "@/data/market";
+import { todayMarketFlow } from "@/data/market-flow";
 import { quiz } from "@/data/quiz";
 import { matchesNewsFeedCategory, type NewsFeedCategory } from "@/lib/news/experience";
 import {
@@ -56,11 +57,12 @@ import {
   type MainTab,
 } from "./primitives";
 import { MarketDataState, MarketIndexRow, MarketIndicatorCard, MarketLineChart, MarketLinkCard, MarketThemeRow, formatMarketValue } from "./market";
+import { HomeMarketFlowCard, MarketFlowDetail } from "./MarketFlow";
 import { DailyStory, HomeLearningCard, ResearchHub, StudyCategoryGrid, StudyMission } from "./dashboard";
 import { NewsDetailView, NewsExplainView, NewsMainView } from "./NewsExperience";
 import { useNewsInteractions } from "./useNewsInteractions";
 
-export type EconFlowView = "home" | "issues" | "issue-detail" | "news" | "news-detail" | "news-explain" | "study" | "lesson" | "research" | "market" | "market-detail" | "profile";
+export type EconFlowView = "home" | "issues" | "issue-detail" | "market-flow" | "news" | "news-detail" | "news-explain" | "study" | "lesson" | "research" | "market" | "market-detail" | "profile";
 
 const tabToView: Record<MainTab, EconFlowView> = { home: "home", news: "news", research: "research", market: "market", profile: "profile" };
 const tabToPath: Record<MainTab, string> = { home: "/", news: "/news", research: "/research", market: "/market", profile: "/my" };
@@ -176,7 +178,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
     return () => controller.abort();
   }, [view, newsReloadKey]);
 
-  const activeTab: MainTab | null = view === "news" || view === "news-detail" || view === "news-explain" ? "news" : view === "research" ? "research" : view === "market" || view === "market-detail" ? "market" : view === "profile" ? "profile" : view === "home" || view === "issues" || view === "issue-detail" ? "home" : null;
+  const activeTab: MainTab | null = view === "news" || view === "news-detail" || view === "news-explain" ? "news" : view === "research" ? "research" : view === "market" || view === "market-detail" ? "market" : view === "profile" ? "profile" : view === "home" || view === "issues" || view === "issue-detail" || view === "market-flow" ? "home" : null;
 
   const go = (next: EconFlowView, path: string) => {
     setView(next);
@@ -263,6 +265,12 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
           <DailyStory issue={issues[0]} onSelect={() => openIssue(issues[0].id)} />
         </section>
 
+        <section className="section-block roomy home-market-flow-section">
+          <SectionHeader title="오늘의 시장 흐름" actionLabel="흐름 자세히 보기" actionHref="/market-flow" />
+          <p className="home-market-flow-description">오늘 시장을 움직인 연결고리를 한눈에 살펴보세요.</p>
+          <HomeMarketFlowCard flow={todayMarketFlow} />
+        </section>
+
         <section className="section-block roomy">
           <SectionHeader title="지금 뜨는 경제 뉴스" onAction={() => navigateTab("news")} />
           <div className="news-list">
@@ -323,6 +331,13 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
       </>
     );
   };
+
+  const renderMarketFlow = () => (
+    <>
+      <AppHeader title="오늘의 시장 흐름" backHref="/" />
+      <MarketFlowDetail flow={todayMarketFlow} />
+    </>
+  );
 
   const renderNewsLegacy = () => (
     <>
@@ -554,7 +569,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
 
   void renderNewsLegacy;
   void renderNewsDetailLegacy;
-  const current = view === "home" ? renderHome() : view === "issues" ? renderIssues() : view === "issue-detail" ? renderIssueDetail() : view === "news" ? renderNews() : view === "news-detail" ? renderNewsDetail() : view === "news-explain" ? renderNewsExplain() : view === "study" ? renderStudy() : view === "lesson" ? renderLesson() : view === "research" ? renderResearch() : view === "market" ? renderMarket() : view === "market-detail" ? renderMarketDetail() : renderProfile();
+  const current = view === "home" ? renderHome() : view === "issues" ? renderIssues() : view === "issue-detail" ? renderIssueDetail() : view === "market-flow" ? renderMarketFlow() : view === "news" ? renderNews() : view === "news-detail" ? renderNewsDetail() : view === "news-explain" ? renderNewsExplain() : view === "study" ? renderStudy() : view === "lesson" ? renderLesson() : view === "research" ? renderResearch() : view === "market" ? renderMarket() : view === "market-detail" ? renderMarketDetail() : renderProfile();
 
   return (
     <main className="app-canvas app-light-canvas">

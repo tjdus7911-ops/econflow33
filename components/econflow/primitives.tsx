@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { ReactNode } from "react";
 import {
   ArrowLeft,
@@ -40,27 +41,34 @@ export const displayBrandName = (value: string) => value.replaceAll("Jester", "E
 export function AppHeader({
   title,
   onBack,
+  backHref,
   action = "none",
   onAction,
   onSearch,
 }: {
   title: string;
   onBack?: () => void;
+  backHref?: string;
   action?: "none" | "bell" | "search" | "settings" | "info" | "home";
   onAction?: () => void;
   onSearch?: () => void;
 }) {
   const ActionIcon = action === "bell" ? Bell : action === "settings" ? Settings : action === "info" ? Info : Search;
+  const hasBack = Boolean(onBack || backHref);
   return (
-    <header className={`app-header${!onBack && title === "EconFlow" ? " app-header-brand" : ""}`}>
+    <header className={`app-header${!hasBack && title === "EconFlow" ? " app-header-brand" : ""}`}>
       <div className="header-side">
-        {onBack ? (
+        {backHref ? (
+          <Link className="icon-button subtle" href={backHref} aria-label="이전 화면">
+            <ArrowLeft aria-hidden="true" />
+          </Link>
+        ) : onBack ? (
           <button className="icon-button subtle" onClick={onBack} aria-label="이전 화면">
             <ArrowLeft aria-hidden="true" />
           </button>
         ) : null}
       </div>
-      <strong className={onBack ? "header-title centered" : "brand"}>{title === "EconFlow" ? <>Econ<span>Flow</span></> : title}</strong>
+      <strong className={hasBack ? "header-title centered" : "brand"}>{title === "EconFlow" ? <>Econ<span>Flow</span></> : title}</strong>
       <div className="header-side end">
         {action === "home" ? <>
           <button className="icon-button" onClick={onSearch} aria-label="검색"><Search aria-hidden="true" /></button>
@@ -98,14 +106,14 @@ export function BottomNavigation({ active, onNavigate }: { active: MainTab | nul
   );
 }
 
-export function SectionHeader({ kicker, title, count, actionLabel = "전체보기", onAction }: { kicker?: string; title: string; count?: number; actionLabel?: string; onAction?: () => void }) {
+export function SectionHeader({ kicker, title, count, actionLabel = "전체보기", actionHref, onAction }: { kicker?: string; title: string; count?: number; actionLabel?: string; actionHref?: string; onAction?: () => void }) {
   return (
     <div className="section-heading">
       <div>
         {kicker ? <span className="section-kicker">{kicker}</span> : null}
         <h2>{title}{typeof count === "number" ? <em>{count}</em> : null}</h2>
       </div>
-      {onAction ? <button className="text-button" onClick={onAction}>{actionLabel} <ArrowRight aria-hidden="true" /></button> : null}
+      {actionHref ? <Link className="text-button" href={actionHref}>{actionLabel} <ArrowRight aria-hidden="true" /></Link> : onAction ? <button className="text-button" onClick={onAction}>{actionLabel} <ArrowRight aria-hidden="true" /></button> : null}
     </div>
   );
 }
