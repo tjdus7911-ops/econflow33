@@ -1713,7 +1713,7 @@ body,
 .news-hub-intro > div { min-width: 0; }
 .news-hub-intro h1 { margin: 0; font-size: 1.28rem; line-height: 1.38; font-weight: 790; letter-spacing: -.045em; }
 .news-hub-intro p { margin: 8px 0 0; color: var(--ef-muted); font-size: .76rem; line-height: 1.45; }
-.nami-image { flex: 0 0 auto; object-fit: contain; filter: none; }
+.news-mascot { flex: 0 0 auto; }
 .news-inline-notice { display: flex; align-items: center; gap: 8px; margin: 8px 0 12px; padding: 11px 12px; border-radius: 12px; background: var(--ef-blue-soft); color: #315f9c; font-size: .74rem; font-weight: 650; }
 .news-inline-notice svg { width: 16px; height: 16px; }
 .news-preview-banner { display: flex; align-items: center; gap: 10px; margin: 4px 0 14px; padding: 12px 13px; border: 1px solid #f2d59a; border-radius: 14px; background: #fff9eb; color: #74551b; }
