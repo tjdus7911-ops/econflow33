@@ -3,17 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 import { watchlistUniverse, type WatchlistItem } from "@/data/market-overview";
 
-const STORAGE_KEY = "econflow-market-watchlist-v1";
+const STORAGE_KEY = "econflow-market-watchlist-v2";
 
 type PersistedWatchlist = {
   itemIds: string[];
   alertIds: string[];
 };
 
-const emptyWatchlist: PersistedWatchlist = { itemIds: [], alertIds: [] };
+const starterWatchlist: PersistedWatchlist = {
+  itemIds: ["005930", "NVDA", "TSLA", "QQQ", "035420"],
+  alertIds: [],
+};
 
 export function useMarketWatchlist() {
-  const [state, setState] = useState<PersistedWatchlist>(emptyWatchlist);
+  const [state, setState] = useState<PersistedWatchlist>(starterWatchlist);
   const hydrated = useRef(false);
 
   useEffect(() => {

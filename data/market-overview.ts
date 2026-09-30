@@ -54,12 +54,15 @@ export type MarketTheme = {
   tab: "realtime" | "up" | "down";
   rank: number;
   changePercent: number;
+  direction: MarketDirection;
+  image: string;
   relatedCount: number;
   keywords: string[];
   dataSource: "mock";
 };
 
 export const marketTopCategories = [
+  { id: "all", label: "전체" },
   { id: "kr-stock", label: "국내주식" },
   { id: "us-stock", label: "미국주식" },
   { id: "fx", label: "환율" },
@@ -71,7 +74,6 @@ export const marketTopCategories = [
 export type MarketTopCategory = (typeof marketTopCategories)[number]["id"];
 
 export const marketIndicatorFilters = [
-  { id: "all", label: "전체" },
   { id: "stock", label: "주가지수" },
   { id: "etf", label: "ETF" },
   { id: "fx", label: "환율" },
@@ -81,6 +83,19 @@ export const marketIndicatorFilters = [
 ] as const;
 
 export type MarketIndicatorFilter = (typeof marketIndicatorFilters)[number]["id"];
+
+export const marketDailyBrief = {
+  title: "금리 인하 기대가 낮아지며 달러가 강세를 보이고 있어요.",
+  reasons: [
+    "미국 물가 지표가 예상보다 높게 나왔어요.",
+    "연준의 금리 인하 기대가 낮아지고 있어요.",
+    "달러 강세로 신흥국 증시에 부담이 커지고 있어요.",
+  ],
+  updatedAt: "오늘 오전 10:20",
+  dataSource: "mock" as const,
+};
+
+export const keyAssetIds = ["kospi", "sp500", "usd-krw", "gold", "nasdaq", "wti"] as const;
 
 const typeForCategory = (category: MarketCategory): MarketIndicatorType => {
   if (category === "stock") return "INDEX";
@@ -92,8 +107,8 @@ const typeForCategory = (category: MarketCategory): MarketIndicatorType => {
 
 const baseIndicators: MarketOverviewIndicator[] = marketIndicators.map((indicator) => ({
   id: indicator.id,
-  name: indicator.name,
-  shortName: indicator.shortName,
+  name: indicator.id === "nasdaq" ? "NASDAQ 100" : indicator.name,
+  shortName: indicator.id === "nasdaq" ? "NASDAQ 100" : indicator.shortName,
   category: indicator.category,
   type: typeForCategory(indicator.category),
   market: indicator.country,
@@ -112,14 +127,24 @@ const overviewOnlyIndicators: MarketOverviewIndicator[] = [
   { id: "kospi200", name: "코스피 200", shortName: "KOSPI 200", category: "stock", type: "INDEX", market: "KR", value: 337.84, change: 1.18, changePercent: .35, unit: "", direction: "up", chartData: [332, 334, 333, 335, 336, 337, 338], updatedAt: "장 마감 기준", dataSource: "mock" },
   { id: "dow-jones", name: "다우존스", shortName: "DOW", category: "stock", type: "INDEX", market: "US", value: 38996.39, change: 141.43, changePercent: .36, unit: "", direction: "up", chartData: [38620, 38690, 38650, 38780, 38830, 38920, 38996], updatedAt: "전일 종가 기준", dataSource: "mock" },
   { id: "russell2000", name: "러셀 2000", shortName: "RUSSELL 2000", category: "stock", type: "INDEX", market: "US", value: 2063.12, change: -8.41, changePercent: -.41, unit: "", direction: "down", chartData: [2084, 2078, 2081, 2072, 2069, 2066, 2063], updatedAt: "전일 종가 기준", dataSource: "mock" },
+  { id: "shanghai", name: "상하이종합", shortName: "상하이종합", category: "stock", type: "INDEX", market: "CN", value: 3110.48, change: 10.74, changePercent: .35, unit: "", direction: "up", chartData: [3078, 3086, 3082, 3094, 3098, 3105, 3110], updatedAt: "전일 종가 기준", dataSource: "mock" },
+  { id: "csi300", name: "CSI 300", shortName: "CSI 300", category: "stock", type: "INDEX", market: "CN", value: 3568.12, change: -7.31, changePercent: -.2, unit: "", direction: "down", chartData: [3592, 3584, 3588, 3579, 3575, 3572, 3568], updatedAt: "전일 종가 기준", dataSource: "mock" },
+  { id: "euro-stoxx50", name: "유로스톡스 50", shortName: "EURO STOXX 50", category: "stock", type: "INDEX", market: "EU", value: 5083.42, change: 18.77, changePercent: .37, unit: "", direction: "up", chartData: [5016, 5031, 5025, 5048, 5056, 5071, 5083], updatedAt: "전일 종가 기준", dataSource: "mock" },
+  { id: "dax", name: "독일 DAX", shortName: "DAX", category: "stock", type: "INDEX", market: "EU", value: 18518.39, change: -42.16, changePercent: -.23, unit: "", direction: "down", chartData: [18642, 18610, 18625, 18588, 18572, 18548, 18518], updatedAt: "전일 종가 기준", dataSource: "mock" },
+  { id: "nikkei225", name: "닛케이 225", shortName: "NIKKEI 225", category: "stock", type: "INDEX", market: "JP", value: 39829.56, change: 184.12, changePercent: .46, unit: "", direction: "up", chartData: [39220, 39380, 39310, 39540, 39620, 39710, 39830], updatedAt: "전일 종가 기준", dataSource: "mock" },
+  { id: "topix", name: "토픽스", shortName: "TOPIX", category: "stock", type: "INDEX", market: "JP", value: 2721.18, change: -8.74, changePercent: -.32, unit: "", direction: "down", chartData: [2744, 2738, 2741, 2732, 2729, 2725, 2721], updatedAt: "전일 종가 기준", dataSource: "mock" },
   { id: "qqq", name: "인베스코 QQQ", shortName: "QQQ (ETF)", category: "etf", type: "ETF", market: "US", value: 442.31, change: 2.43, changePercent: .55, unit: "달러", direction: "up", chartData: [434, 436, 435, 438, 439, 441, 442], updatedAt: "전일 종가 기준", dataSource: "mock" },
   { id: "spy", name: "SPDR S&P 500", shortName: "SPY (ETF)", category: "etf", type: "ETF", market: "US", value: 507.18, change: 2.78, changePercent: .55, unit: "달러", direction: "up", chartData: [498, 499, 501, 500, 503, 505, 507], updatedAt: "전일 종가 기준", dataSource: "mock" },
   { id: "kodex200", name: "KODEX 200", shortName: "KODEX 200 (ETF)", category: "etf", type: "ETF", market: "KR", value: 33825, change: 115, changePercent: .34, unit: "원", direction: "up", chartData: [33320, 33480, 33410, 33590, 33620, 33710, 33825], updatedAt: "장 마감 기준", dataSource: "mock" },
   { id: "eur-krw", name: "원/유로 환율", shortName: "EUR/KRW", category: "fx", type: "FX", market: "EU", value: 1442.62, change: 3.08, changePercent: .21, unit: "원", direction: "up", chartData: [1430, 1434, 1432, 1438, 1436, 1440, 1443], updatedAt: "오후 4:00 기준", dataSource: "mock" },
   { id: "cny-krw", name: "원/위안 환율", shortName: "CNY/KRW", category: "fx", type: "FX", market: "CN", value: 184.22, change: -.31, changePercent: -.17, unit: "원", direction: "down", chartData: [185, 184.8, 184.9, 184.6, 184.5, 184.4, 184.2], updatedAt: "오후 4:00 기준", dataSource: "mock" },
   { id: "kr-10y", name: "한국 10년물 국채금리", shortName: "한국 10년물", category: "bond", type: "BOND", market: "KR", value: 3.42, change: .03, changePercent: .88, unit: "%", direction: "up", chartData: [3.31, 3.34, 3.32, 3.36, 3.38, 3.39, 3.42], updatedAt: "장 마감 기준", dataSource: "mock" },
+  { id: "kr-5y", name: "한국 5년물 국채금리", shortName: "한국 국채 5년", category: "bond", type: "BOND", market: "KR", value: 3.36, change: .02, changePercent: .6, unit: "%", direction: "up", chartData: [3.27, 3.29, 3.28, 3.31, 3.32, 3.34, 3.36], updatedAt: "장 마감 기준", dataSource: "mock" },
+  { id: "kr-3m", name: "한국 3개월물 국채금리", shortName: "한국 국채 3개월", category: "bond", type: "BOND", market: "KR", value: 3.48, change: 0, changePercent: 0, unit: "%", direction: "steady", chartData: [3.47, 3.48, 3.48, 3.48, 3.49, 3.48, 3.48], updatedAt: "장 마감 기준", dataSource: "mock" },
   { id: "kr-3y", name: "한국 3년물 국채금리", shortName: "한국 3년물", category: "bond", type: "BOND", market: "KR", value: 3.27, change: -.02, changePercent: -.61, unit: "%", direction: "down", chartData: [3.34, 3.32, 3.33, 3.3, 3.29, 3.28, 3.27], updatedAt: "장 마감 기준", dataSource: "mock" },
   { id: "us-2y", name: "미국 2년물 국채금리", shortName: "미국 2년물", category: "bond", type: "BOND", market: "US", value: 4.71, change: .05, changePercent: 1.07, unit: "%", direction: "up", chartData: [4.59, 4.62, 4.61, 4.65, 4.67, 4.69, 4.71], updatedAt: "전일 종가 기준", dataSource: "mock" },
+  { id: "us-5y", name: "미국 5년물 국채금리", shortName: "미국 국채 5년", category: "bond", type: "BOND", market: "US", value: 4.46, change: .06, changePercent: 1.36, unit: "%", direction: "up", chartData: [4.31, 4.34, 4.33, 4.38, 4.4, 4.43, 4.46], updatedAt: "전일 종가 기준", dataSource: "mock" },
+  { id: "us-3m", name: "미국 3개월물 국채금리", shortName: "미국 국채 3개월", category: "bond", type: "BOND", market: "US", value: 5.38, change: .01, changePercent: .19, unit: "%", direction: "up", chartData: [5.36, 5.37, 5.37, 5.38, 5.37, 5.38, 5.38], updatedAt: "전일 종가 기준", dataSource: "mock" },
   { id: "wti", name: "서부텍사스유", shortName: "WTI", category: "commodity", type: "COMMODITY", market: "GLOBAL", value: 82.14, change: 1.08, changePercent: 1.33, unit: "달러/배럴", direction: "up", chartData: [79.8, 80.4, 80.1, 80.9, 81.2, 81.7, 82.1], updatedAt: "전일 종가 기준", dataSource: "mock" },
   { id: "silver", name: "은 현물", shortName: "SILVER", category: "commodity", type: "COMMODITY", market: "GLOBAL", value: 27.42, change: -.18, changePercent: -.65, unit: "달러/oz", direction: "down", chartData: [28.1, 27.9, 28, 27.8, 27.7, 27.5, 27.4], updatedAt: "전일 종가 기준", dataSource: "mock" },
 ];
@@ -135,16 +160,17 @@ export const watchlistUniverse: WatchlistItem[] = [
   { id: "NVDA", symbol: "NVDA", name: "엔비디아", market: "US", type: "STOCK", value: 887.89, change: 14.72, changePercent: 1.69, chartData: [848, 856, 852, 866, 873, 881, 888], alertEnabled: false, dataSource: "mock" },
   { id: "TSLA", symbol: "TSLA", name: "테슬라", market: "US", type: "STOCK", value: 243.62, change: -4.21, changePercent: -1.7, chartData: [252, 249, 251, 247, 246, 245, 244], alertEnabled: false, dataSource: "mock" },
   { id: "QQQ", symbol: "QQQ", name: "인베스코 QQQ", market: "US", type: "ETF", value: 442.31, change: 2.43, changePercent: .55, chartData: [434, 436, 435, 438, 439, 441, 442], alertEnabled: false, dataSource: "mock" },
+  { id: "SPY", symbol: "SPY", name: "SPDR S&P 500", market: "US", type: "ETF", value: 507.18, change: 2.78, changePercent: .55, chartData: [498, 499, 501, 500, 503, 505, 507], alertEnabled: false, dataSource: "mock" },
 ];
 
 export const marketCalendarDays = [
-  { date: "2026-09-28", day: "월", dateLabel: "28" },
-  { date: "2026-09-29", day: "화", dateLabel: "29" },
-  { date: "2026-09-30", day: "수", dateLabel: "30" },
-  { date: "2026-10-01", day: "목", dateLabel: "1" },
-  { date: "2026-10-02", day: "금", dateLabel: "2" },
-  { date: "2026-10-03", day: "토", dateLabel: "3" },
-  { date: "2026-10-04", day: "일", dateLabel: "4" },
+  { date: "2026-09-30", day: "수", dateLabel: "9/30" },
+  { date: "2026-10-01", day: "목", dateLabel: "10/1" },
+  { date: "2026-10-02", day: "금", dateLabel: "10/2" },
+  { date: "2026-10-03", day: "토", dateLabel: "10/3" },
+  { date: "2026-10-04", day: "일", dateLabel: "10/4" },
+  { date: "2026-10-05", day: "월", dateLabel: "10/5" },
+  { date: "2026-10-06", day: "화", dateLabel: "10/6" },
 ] as const;
 
 export const economicEvents: EconomicEvent[] = [
@@ -157,17 +183,19 @@ export const economicEvents: EconomicEvent[] = [
   { id: "event-1001-1", date: "2026-10-01", country: "US", time: "23:00", title: "ISM 제조업 구매관리자지수", importance: "high", forecast: "49.1", previous: "48.7", dataSource: "mock" },
   { id: "event-1002-1", date: "2026-10-02", country: "US", time: "21:30", title: "미국 신규 실업수당청구건수", importance: "high", forecast: "228K", previous: "224K", dataSource: "mock" },
   { id: "event-1004-1", date: "2026-10-04", country: "JP", time: "08:50", title: "일본 외환보유액", importance: "low", previous: "$1.23T", dataSource: "mock" },
+  { id: "event-1005-1", date: "2026-10-05", country: "EU", time: "18:00", title: "유로존 생산자물가지수", importance: "medium", forecast: "0.2%", previous: "0.1%", dataSource: "mock" },
+  { id: "event-1006-1", date: "2026-10-06", country: "US", time: "23:00", title: "미국 서비스업 구매관리자지수", importance: "high", forecast: "52.4", previous: "52.0", dataSource: "mock" },
 ];
 
 export const marketThemes: MarketTheme[] = [
-  { id: "theme-ai", name: "AI / 반도체", tab: "realtime", rank: 1, changePercent: 2.8, relatedCount: 18, keywords: ["AI", "데이터센터"], dataSource: "mock" },
-  { id: "theme-power", name: "원전 / 전력", tab: "realtime", rank: 2, changePercent: 1.9, relatedCount: 12, keywords: ["전력망", "원전"], dataSource: "mock" },
-  { id: "theme-battery", name: "2차전지", tab: "realtime", rank: 3, changePercent: 1.7, relatedCount: 10, keywords: ["배터리", "소재"], dataSource: "mock" },
-  { id: "theme-defense", name: "방산", tab: "realtime", rank: 4, changePercent: 1.5, relatedCount: 8, keywords: ["수출", "방산"], dataSource: "mock" },
-  { id: "theme-bio", name: "바이오", tab: "up", rank: 1, changePercent: 3.2, relatedCount: 9, keywords: ["신약", "임상"], dataSource: "mock" },
-  { id: "theme-robot", name: "로봇", tab: "up", rank: 2, changePercent: 2.4, relatedCount: 7, keywords: ["자동화", "로봇"], dataSource: "mock" },
-  { id: "theme-ev", name: "전기차", tab: "up", rank: 3, changePercent: 1.3, relatedCount: 6, keywords: ["완성차", "충전"], dataSource: "mock" },
-  { id: "theme-shipping", name: "해운", tab: "down", rank: 1, changePercent: -2.1, relatedCount: 11, keywords: ["운임", "물류"], dataSource: "mock" },
-  { id: "theme-travel", name: "여행 / 항공", tab: "down", rank: 2, changePercent: -1.6, relatedCount: 5, keywords: ["유가", "여객"], dataSource: "mock" },
-  { id: "theme-internet", name: "인터넷 플랫폼", tab: "down", rank: 3, changePercent: -.9, relatedCount: 8, keywords: ["광고", "플랫폼"], dataSource: "mock" },
+  { id: "theme-ai", name: "AI / 반도체", tab: "realtime", rank: 1, changePercent: 2.8, direction: "up", image: "/news/technology.webp", relatedCount: 18, keywords: ["AI", "데이터센터"], dataSource: "mock" },
+  { id: "theme-power", name: "원전 / 전력", tab: "realtime", rank: 2, changePercent: 1.9, direction: "up", image: "/news/rates.webp", relatedCount: 12, keywords: ["전력망", "원전"], dataSource: "mock" },
+  { id: "theme-battery", name: "2차전지", tab: "realtime", rank: 3, changePercent: 1.7, direction: "up", image: "/news/technology.webp", relatedCount: 10, keywords: ["배터리", "소재"], dataSource: "mock" },
+  { id: "theme-defense", name: "방산", tab: "realtime", rank: 4, changePercent: 1.5, direction: "up", image: "/news/currency.webp", relatedCount: 8, keywords: ["수출", "방산"], dataSource: "mock" },
+  { id: "theme-bio", name: "바이오", tab: "up", rank: 1, changePercent: 3.2, direction: "up", image: "/news/technology.webp", relatedCount: 9, keywords: ["신약", "임상"], dataSource: "mock" },
+  { id: "theme-robot", name: "로봇", tab: "up", rank: 2, changePercent: 2.4, direction: "up", image: "/news/technology.webp", relatedCount: 7, keywords: ["자동화", "로봇"], dataSource: "mock" },
+  { id: "theme-ev", name: "전기차", tab: "up", rank: 3, changePercent: 1.3, direction: "up", image: "/news/technology.webp", relatedCount: 6, keywords: ["완성차", "충전"], dataSource: "mock" },
+  { id: "theme-shipping", name: "해운", tab: "down", rank: 1, changePercent: -2.1, direction: "down", image: "/news/currency.webp", relatedCount: 11, keywords: ["운임", "물류"], dataSource: "mock" },
+  { id: "theme-travel", name: "여행 / 항공", tab: "down", rank: 2, changePercent: -1.6, direction: "down", image: "/news/currency.webp", relatedCount: 5, keywords: ["유가", "여객"], dataSource: "mock" },
+  { id: "theme-internet", name: "인터넷 플랫폼", tab: "down", rank: 3, changePercent: -.9, direction: "down", image: "/news/technology.webp", relatedCount: 8, keywords: ["광고", "플랫폼"], dataSource: "mock" },
 ];
