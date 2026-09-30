@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { NextResponse } from "next/server";
+import { previewSampleNews } from "@/data/previewSampleNews";
 import { aggregateNews } from "@/lib/news/aggregator";
 import { NAVER_NEWS_REVALIDATE_SECONDS } from "@/lib/providers/naver-news";
 
@@ -43,17 +44,45 @@ export async function GET(request: Request) {
   } catch (error) {
     const message = safeMessage(error);
     console.error("[api/news] NAVER API HUB 처리 실패:", message);
+    const previewItems = previewSampleNews.slice(0, limit);
     return NextResponse.json(
       {
-        success: false,
+        success: true,
         updatedAt: new Date().toISOString(),
-        items: [],
-        count: 0,
-        source: "NAVER API HUB Search API",
-        fallback: false,
-        error: message,
+        items: previewItems,
+        count: previewItems.length,
+        providers: [
+          {
+            id: "naver",
+            sourceType: "news-api",
+            configured: !message.includes("환경변수가 설정되지 않았습니다"),
+            ok: false,
+            count: 0,
+            message,
+          },
+          {
+            id: "mock",
+            sourceType: "mock",
+            configured: true,
+            ok: true,
+            count: previewItems.length,
+            message: "운영 UI 확인용 Preview Sample News",
+          },
+        ],
+        source: "Preview Sample News",
+        fallback: true,
+        preview: true,
+        previewLabel: "미리보기 데이터",
+        fallbackReason: message,
+        imageScrapingEnabled: false,
+        thumbnailStats: {
+          enabled: false,
+          attempted: 0,
+          succeeded: 0,
+          failed: 0,
+        },
       },
-      { status: 502, headers: { "Cache-Control": "no-store" } },
+      { status: 200, headers: { "Cache-Control": "no-store" } },
     );
   }
 }

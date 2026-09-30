@@ -60,6 +60,9 @@ const stableNumber = (value: string) => {
 const newsText = (item: NewsItem) => `${item.title} ${item.description} ${item.summary} ${item.category} ${item.keywords.join(" ")}`;
 
 export function getNewsFeedCategory(item: NewsItem): Exclude<NewsFeedCategory, "전체"> {
+  if (item.dataSource === "preview-sample" && NEWS_FEED_CATEGORIES.includes(item.category as NewsFeedCategory)) {
+    return item.category as Exclude<NewsFeedCategory, "전체">;
+  }
   const text = newsText(item);
   const publishedTime = Date.parse(item.publishedAtRaw);
   if (Number.isFinite(publishedTime) && Date.now() - publishedTime < 90 * 60_000) return "속보";
@@ -73,6 +76,7 @@ export const matchesNewsFeedCategory = (item: NewsItem, category: NewsFeedCatego
   category === "전체" || getNewsFeedCategory(item) === category;
 
 export function getRelatedCompanies(item: NewsItem): RelatedCompany[] {
+  if (item.relatedCompanies?.length) return item.relatedCompanies.slice(0, 4);
   const text = newsText(item);
   return COMPANY_DICTIONARY
     .filter((company) => company.pattern.test(text))
@@ -82,14 +86,18 @@ export function getRelatedCompanies(item: NewsItem): RelatedCompany[] {
 
 export function getNewsMetrics(item: NewsItem) {
   const seed = stableNumber(item.id);
-  const participation = 180 + seed % 420;
-  const positivePercent = 38 + seed % 39;
+  const previewSentiment = item.previewContent?.sentiment;
+  const participation = previewSentiment
+    ? previewSentiment.positive + previewSentiment.negative
+    : 180 + seed % 420;
+  const positive = previewSentiment?.positive
+    ?? Math.round(participation * (38 + seed % 39) / 100);
   return {
-    viewCount: 8_000 + seed % 42_000,
-    commentCount: 18 + seed % 139,
+    viewCount: item.viewCount ?? 8_000 + seed % 42_000,
+    commentCount: item.commentCount ?? 18 + seed % 139,
     participation,
-    positive: Math.round(participation * positivePercent / 100),
-    negative: participation - Math.round(participation * positivePercent / 100),
+    positive,
+    negative: previewSentiment?.negative ?? participation - positive,
   };
 }
 
@@ -145,6 +153,19 @@ const categoryExplanation = (category: string) => {
 };
 
 export function buildNewsAiContent(item: NewsItem): NewsAiContent {
+  if (item.previewContent) {
+    return {
+      newsId: item.id,
+      shortSummary: item.previewContent.aiSummary,
+      whatHappened: item.previewContent.whatHappened,
+      whyImportant: item.previewContent.whyImportant,
+      impact: item.previewContent.impact,
+      personalMeaning: item.previewContent.personalMeaning,
+      keyTakeaway: item.previewContent.keyTakeaway,
+      generatedAt: item.fetchedAt || item.publishedAtRaw,
+      sourceReferences: [],
+    };
+  }
   const description = (item.description || item.summary).trim();
   const feedCategory = getNewsFeedCategory(item);
   const keywordSummary = item.keywords.slice(0, 3).join("·");
@@ -166,6 +187,21 @@ export function buildNewsAiContent(item: NewsItem): NewsAiContent {
 }
 
 export function getSeedComments(item: NewsItem): NewsComment[] {
+  if (item.previewContent?.comments.length) {
+    return item.previewContent.comments.map((comment, index) => ({
+      id: comment.id,
+      newsId: item.id,
+      userId: `preview-user-${item.id}-${index + 1}`,
+      userName: comment.userName,
+      content: comment.content,
+      likeCount: comment.likeCount,
+      likedBy: [],
+      reportedBy: [],
+      parentCommentId: null,
+      createdAt: comment.createdAt,
+      updatedAt: comment.createdAt,
+    }));
+  }
   const metrics = getNewsMetrics(item);
   return [
     {

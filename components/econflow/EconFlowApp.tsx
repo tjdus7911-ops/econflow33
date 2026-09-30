@@ -90,6 +90,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
   const [selectedNewsItem, setSelectedNewsItem] = useState<NewsItem | null>(null);
   const [liveNews, setLiveNews] = useState<NewsItem[]>([]);
   const [newsLoadState, setNewsLoadState] = useState<"loading" | "ready" | "empty" | "error">("loading");
+  const [newsPreviewMode, setNewsPreviewMode] = useState(false);
   const [newsReloadKey, setNewsReloadKey] = useState(0);
   const [lessonId, setLessonId] = useState(initialView === "lesson" && initialId ? initialId : lessons[0].id);
   const [marketId, setMarketId] = useState(initialView === "market-detail" && initialId ? initialId : marketIndicators[0].id);
@@ -145,11 +146,12 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
           headers: { Accept: "application/json" },
           signal: controller.signal,
         });
-        const payload = await response.json() as { items?: NewsItem[]; error?: string; imageScrapingEnabled?: boolean };
+        const payload = await response.json() as { items?: NewsItem[]; error?: string; imageScrapingEnabled?: boolean; fallback?: boolean };
         if (!response.ok) throw new Error(payload.error ?? "뉴스 API 요청 실패: " + response.status);
 
         const items = payload.items ?? [];
         setLiveNews(items);
+        setNewsPreviewMode(Boolean(payload.fallback));
         setNewsLoadState(items.length ? "ready" : "empty");
 
         if (items.length && payload.imageScrapingEnabled) {
@@ -158,13 +160,14 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
             signal: controller.signal,
           });
           if (imageResponse.ok) {
-            const imagePayload = await imageResponse.json() as { items?: NewsItem[] };
-            if (imagePayload.items?.length) setLiveNews(imagePayload.items);
+            const imagePayload = await imageResponse.json() as { items?: NewsItem[]; fallback?: boolean };
+            if (imagePayload.items?.length && !imagePayload.fallback) setLiveNews(imagePayload.items);
           }
         }
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") return;
         setLiveNews([]);
+        setNewsPreviewMode(false);
         setNewsLoadState("error");
       }
     };
@@ -345,6 +348,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
     category={newsFilter}
     query={query}
     bookmarkedIds={savedNewsIds}
+    previewMode={newsPreviewMode}
     notice={notice}
     onCategory={setNewsFilter}
     onQuery={setQuery}

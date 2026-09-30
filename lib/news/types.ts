@@ -1,5 +1,40 @@
 export type NewsSourceType = "official" | "publisher" | "news-api" | "mock";
 
+export type NewsRelatedIndicator = {
+  id: string;
+  name: string;
+  value: string;
+  change: string;
+  direction: "up" | "down" | "steady";
+};
+
+export type PreviewNewsComment = {
+  id: string;
+  userName: string;
+  content: string;
+  likeCount: number;
+  createdAt: string;
+};
+
+export type PreviewNewsContent = {
+  label: "Preview Sample News";
+  aiSummary: string[];
+  whatHappened: string;
+  whyImportant: string;
+  impact: string;
+  personalMeaning: string;
+  keyTakeaway: string;
+  sentiment: {
+    positive: number;
+    negative: number;
+  };
+  feedback: {
+    helpful: number;
+    difficult: number;
+  };
+  comments: PreviewNewsComment[];
+};
+
 export type NewsItem = {
   id: string;
   title: string;
@@ -34,9 +69,10 @@ export type NewsItem = {
   // Backend-ready enrichment fields. Providers may omit these until the
   // classification and persistence pipeline is connected.
   relatedCompanies?: Array<{ name: string; symbol: string }>;
-  relatedIndicators?: string[];
+  relatedIndicators?: NewsRelatedIndicator[];
   viewCount?: number;
   commentCount?: number;
+  previewContent?: PreviewNewsContent;
 };
 
 export type NewsProviderId = "gnews" | "bok-rss" | "naver" | "mock";
