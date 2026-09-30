@@ -3,14 +3,14 @@ import "./globals.css";
 import "./econflow-v2.css";
 
 export const metadata: Metadata = {
-  title: "Jester — 오늘의 경제를 쉽게",
-  applicationName: "Jester",
+  title: "EconFlow — 오늘의 경제를 쉽게",
+  applicationName: "EconFlow",
   description: "오늘의 경제 이슈와 뉴스를 쉽게 이해하고, 필요한 개념을 바로 공부하세요.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Jester",
+    statusBarStyle: "default",
+    title: "EconFlow",
   },
   icons: {
     icon: [
@@ -23,8 +23,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#080d12",
-  colorScheme: "dark",
+  themeColor: "#ffffff",
+  colorScheme: "light",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

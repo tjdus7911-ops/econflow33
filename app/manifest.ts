@@ -2,14 +2,14 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Jester",
-    short_name: "Jester",
+    name: "EconFlow",
+    short_name: "EconFlow",
     description: "오늘의 경제 이슈와 뉴스를 쉽게 이해하고 필요한 개념을 공부하는 모바일 앱",
     start_url: "/",
     scope: "/",
     display: "standalone",
-    background_color: "#080d12",
-    theme_color: "#080d12",
+    background_color: "#ffffff",
+    theme_color: "#ffffff",
     lang: "ko-KR",
     orientation: "portrait-primary",
     icons: [

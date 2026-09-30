@@ -19,7 +19,8 @@ const mockNewsSeed: MockNewsSeed[] = [
 
 export const news: NewsItem[] = mockNewsSeed.map((item) => ({
   ...item,
-  publisher: item.source,
+  source: item.source.replaceAll("Jester", "EconFlow"),
+  publisher: item.source.replaceAll("Jester", "EconFlow"),
   originalLink: item.sourceUrl,
   link: item.sourceUrl,
   pubDate: "",

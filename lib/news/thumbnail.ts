@@ -155,7 +155,7 @@ async function requestArticleImage(startUrl: string): Promise<string | null> {
       redirect: "manual",
       headers: {
         Accept: "text/html,application/xhtml+xml;q=0.9",
-        "User-Agent": "JesterNewsPreview/1.0",
+        "User-Agent": "EconFlowNewsPreview/1.0",
       },
       cache: "no-store",
       signal: AbortSignal.timeout(SCRAPE_TIMEOUT_MS),

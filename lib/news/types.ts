@@ -30,6 +30,13 @@ export type NewsItem = {
   relatedIssueId?: string;
   relatedMarketIds: string[];
   relatedLessonId?: string;
+
+  // Backend-ready enrichment fields. Providers may omit these until the
+  // classification and persistence pipeline is connected.
+  relatedCompanies?: Array<{ name: string; symbol: string }>;
+  relatedIndicators?: string[];
+  viewCount?: number;
+  commentCount?: number;
 };
 
 export type NewsProviderId = "gnews" | "bok-rss" | "naver" | "mock";

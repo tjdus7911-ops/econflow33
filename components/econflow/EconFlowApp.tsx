@@ -35,16 +35,17 @@ import { news, type NewsItem } from "@/data/news";
 import { lessons } from "@/data/lessons";
 import { marketCategories, marketIndicators, marketSummary, type MarketCategory, type MarketPeriod } from "@/data/market";
 import { quiz } from "@/data/quiz";
+import { matchesNewsFeedCategory, type NewsFeedCategory } from "@/lib/news/experience";
 import {
   AppHeader,
   Badge,
   BottomNavigation,
   CategoryChip,
   Character,
+  displayBrandName,
   EconomicTermTooltip,
   EmptyState,
   FeaturedNewsCard,
-  displayBrandName,
   IssueCard,
   LearningCard,
   NewsCard,
@@ -56,14 +57,16 @@ import {
 } from "./primitives";
 import { MarketDataState, MarketIndexRow, MarketIndicatorCard, MarketLineChart, MarketLinkCard, MarketThemeRow, formatMarketValue } from "./market";
 import { DailyStory, HomeLearningCard, ResearchHub, StudyCategoryGrid, StudyMission } from "./dashboard";
+import { NewsDetailView, NewsExplainView, NewsMainView } from "./NewsExperience";
+import { useNewsInteractions } from "./useNewsInteractions";
 
-export type EconFlowView = "home" | "issues" | "issue-detail" | "news" | "news-detail" | "study" | "lesson" | "research" | "market" | "market-detail" | "profile";
+export type EconFlowView = "home" | "issues" | "issue-detail" | "news" | "news-detail" | "news-explain" | "study" | "lesson" | "research" | "market" | "market-detail" | "profile";
 
 const tabToView: Record<MainTab, EconFlowView> = { home: "home", news: "news", research: "research", market: "market", profile: "profile" };
 const tabToPath: Record<MainTab, string> = { home: "/", news: "/news", research: "/research", market: "/market", profile: "/my" };
 
 const studyCategories = ["추천", "기초", "시장", "기업", "투자전략"];
-const newsDisplayCategories = ["전체", "경제정책", "주식", "글로벌", "산업", "환율"];
+const newsDisplayCategories: NewsFeedCategory[] = ["전체", "속보", "시장", "기업", "산업", "글로벌"];
 const marketViewCategories = [
   { id: "kr-stock", label: "국내주식" },
   { id: "us-stock", label: "미국주식" },
@@ -83,14 +86,15 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
   const router = useRouter();
   const [view, setView] = useState<EconFlowView>(initialView);
   const [issueId, setIssueId] = useState(initialView === "issue-detail" && initialId ? initialId : issues[0].id);
-  const [newsId, setNewsId] = useState(initialView === "news-detail" && initialId ? initialId : news[0].id);
+  const [newsId, setNewsId] = useState((initialView === "news-detail" || initialView === "news-explain") && initialId ? initialId : news[0].id);
+  const [selectedNewsItem, setSelectedNewsItem] = useState<NewsItem | null>(null);
   const [liveNews, setLiveNews] = useState<NewsItem[]>([]);
   const [newsLoadState, setNewsLoadState] = useState<"loading" | "ready" | "empty" | "error">("loading");
   const [newsReloadKey, setNewsReloadKey] = useState(0);
   const [lessonId, setLessonId] = useState(initialView === "lesson" && initialId ? initialId : lessons[0].id);
   const [marketId, setMarketId] = useState(initialView === "market-detail" && initialId ? initialId : marketIndicators[0].id);
   const [issueFilter, setIssueFilter] = useState("전체");
-  const [newsFilter, setNewsFilter] = useState("전체");
+  const [newsFilter, setNewsFilter] = useState<NewsFeedCategory>("전체");
   const [learningFilter, setLearningFilter] = useState("추천");
   const [marketFilter, setMarketFilter] = useState<"kr-stock" | "us-stock" | MarketCategory>("kr-stock");
   const [marketPeriod, setMarketPeriod] = useState<MarketPeriod>("1m");
@@ -102,6 +106,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [notice, setNotice] = useState("");
+  const newsInteractions = useNewsInteractions();
   const routeKey = `${initialView}:${initialId ?? ""}`;
   const [currentRouteKey, setCurrentRouteKey] = useState(routeKey);
 
@@ -109,13 +114,27 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
     setCurrentRouteKey(routeKey);
     setView(initialView);
     if (initialView === "issue-detail" && initialId) setIssueId(initialId);
-    if (initialView === "news-detail" && initialId) setNewsId(initialId);
+    if ((initialView === "news-detail" || initialView === "news-explain") && initialId) setNewsId(initialId);
     if (initialView === "lesson" && initialId) setLessonId(initialId);
     if (initialView === "market-detail" && initialId) setMarketId(initialId);
   }
 
   useEffect(() => {
-    if (view !== "home" && view !== "news") return;
+    if ((view !== "news-detail" && view !== "news-explain") || !initialId) return;
+    const saved = window.sessionStorage.getItem("econflow-selected-news");
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved) as NewsItem;
+      if (parsed.id !== initialId) return;
+      const timer = window.setTimeout(() => setSelectedNewsItem(parsed), 0);
+      return () => window.clearTimeout(timer);
+    } catch {
+      window.sessionStorage.removeItem("econflow-selected-news");
+    }
+  }, [initialId, view]);
+
+  useEffect(() => {
+    if (view !== "home" && view !== "news" && view !== "news-detail" && view !== "news-explain") return;
 
     const controller = new AbortController();
 
@@ -154,7 +173,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
     return () => controller.abort();
   }, [view, newsReloadKey]);
 
-  const activeTab: MainTab | null = view === "news" || view === "news-detail" ? "news" : view === "research" ? "research" : view === "market" || view === "market-detail" ? "market" : view === "profile" ? "profile" : view === "home" || view === "issues" || view === "issue-detail" ? "home" : null;
+  const activeTab: MainTab | null = view === "news" || view === "news-detail" || view === "news-explain" ? "news" : view === "research" ? "research" : view === "market" || view === "market-detail" ? "market" : view === "profile" ? "profile" : view === "home" || view === "issues" || view === "issue-detail" ? "home" : null;
 
   const go = (next: EconFlowView, path: string) => {
     setView(next);
@@ -176,14 +195,17 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
   };
 
   const openIssue = (id: string) => { setIssueId(id); go("issue-detail", `/issues/${id}`); };
-  const openNews = (id: string) => { setNewsId(id); go("news-detail", `/news/${id}`); };
+  const rememberNews = (item: NewsItem | undefined) => {
+    if (!item) return;
+    setSelectedNewsItem(item);
+    window.sessionStorage.setItem("econflow-selected-news", JSON.stringify(item));
+  };
+  const openNews = (id: string) => { rememberNews(liveNews.find((entry) => entry.id === id) ?? news.find((entry) => entry.id === id)); setNewsId(id); go("news-detail", `/news/${id}`); };
+  const openNewsExplanation = (id: string) => { rememberNews(selectedNewsItem?.id === id ? selectedNewsItem : liveNews.find((entry) => entry.id === id) ?? news.find((entry) => entry.id === id)); setNewsId(id); go("news-explain", `/news/${id}/explain`); };
   const openArticle = (item: NewsItem) => {
     const articleUrl = [item.originalLink, item.originalUrl, item.link].find((value) => /^https?:\/\//.test(value));
-    if (articleUrl) {
-      window.open(articleUrl, "_blank", "noopener,noreferrer");
-      return;
-    }
-    openNews(item.id);
+    if (articleUrl) window.open(articleUrl, "_blank", "noopener,noreferrer");
+    else openNews(item.id);
   };
   const openLesson = (id: string) => { setLessonId(id); go("lesson", `/study/${id}`); };
   const openMarket = (id: string) => { setMarketId(id); setMarketPeriod("1m"); go("market-detail", `/market/${id}`); };
@@ -194,13 +216,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
   });
 
   const filteredNews = useMemo(() => liveNews.filter((item) => {
-    const searchable = `${item.title} ${item.summary} ${item.category} ${item.keywords.join(" ")}`;
-    const categoryMatch = newsFilter === "전체"
-      || (newsFilter === "경제정책" && /금리|연준|물가|채권|한국은행/.test(searchable))
-      || (newsFilter === "주식" && /주식|AI|반도체|테크/.test(searchable))
-      || (newsFilter === "글로벌" && /글로벌|운임|미국/.test(searchable))
-      || (newsFilter === "산업" && /산업|전력|데이터센터/.test(searchable))
-      || (newsFilter === "환율" && /환율|달러|원화/.test(searchable));
+    const categoryMatch = matchesNewsFeedCategory(item, newsFilter);
     const searchMatch = !query.trim() || `${item.title} ${item.summary} ${item.category}`.toLowerCase().includes(query.trim().toLowerCase());
     return categoryMatch && searchMatch;
   }), [liveNews, newsFilter, query]);
@@ -218,15 +234,16 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
   const visibleThemes = (themeMetric === "volume"
     ? [...issues].sort((a, b) => b.articleVolume - a.articleVolume)
     : issues.filter((issue) => issue.direction === themeMetric)).slice(0, 4);
+  const todayLabel = new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric", weekday: "long" }).format(new Date());
 
   const renderHome = () => (
     <>
-      <AppHeader title="Jester" action="home" onSearch={() => navigateTab("news")} onAction={() => setNotice("새로운 알림이 없어요. 오늘의 브리핑은 모두 확인할 수 있어요.")} />
+      <AppHeader title="EconFlow" action="home" onSearch={() => navigateTab("news")} onAction={() => setNotice("새로운 알림이 없어요. 오늘의 브리핑은 모두 확인할 수 있어요.")} />
       <div className="screen-content home-content">
         {notice ? <div className="inline-notice"><BellRing aria-hidden="true" />{notice}</div> : null}
         <section className="home-briefing">
           <div className="home-briefing-copy">
-            <span className="today-label">2026년 9월 29일 · 화요일</span>
+            <span className="today-label">{todayLabel}</span>
             <h1>서연님,<br />오늘도 좋은 하루예요! <span aria-hidden="true">👋</span></h1>
             <p>오늘 시장은 금리 인하 기대감으로<br />기술주 중심의 상승 흐름이에요.</p>
           </div>
@@ -249,7 +266,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
             {newsLoadState === "loading" ? <NewsLoadingList count={3} compact /> : null}
             {newsLoadState === "error" ? <NewsDataState state="error" onRetry={() => setNewsReloadKey((value) => value + 1)} /> : null}
             {newsLoadState === "empty" ? <NewsDataState state="empty" /> : null}
-            {newsLoadState === "ready" ? liveNews.slice(0, 3).map((item) => <NewsCard key={item.id} item={item} compact showSource bookmarked={savedNewsIds.has(item.id)} onBookmark={() => toggleBookmark(item.id)} onClick={() => openArticle(item)} />) : null}
+            {newsLoadState === "ready" ? liveNews.slice(0, 3).map((item) => <NewsCard key={item.id} item={item} compact showSource bookmarked={savedNewsIds.has(item.id)} onBookmark={() => toggleBookmark(item.id)} onClick={() => openNews(item.id)} />) : null}
           </div>
         </section>
 
@@ -304,7 +321,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
     );
   };
 
-  const renderNews = () => (
+  const renderNewsLegacy = () => (
     <>
       <AppHeader title="뉴스" onBack={() => navigateTab("home")} action="home" onSearch={() => document.getElementById("news-search")?.focus()} onAction={() => setNotice("새로운 뉴스 알림이 없어요.")} />
       <div className="screen-content page-content news-page">
@@ -322,7 +339,22 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
     </>
   );
 
-  const renderNewsDetail = () => {
+  const renderNews = () => <NewsMainView
+    items={filteredNews}
+    loadState={newsLoadState}
+    category={newsFilter}
+    query={query}
+    bookmarkedIds={savedNewsIds}
+    notice={notice}
+    onCategory={setNewsFilter}
+    onQuery={setQuery}
+    onOpen={openNews}
+    onBookmark={toggleBookmark}
+    onRetry={() => setNewsReloadKey((value) => value + 1)}
+    onNotify={() => setNotice("새로운 뉴스 알림이 없어요.")}
+  />;
+
+  const renderNewsDetailLegacy = () => {
     const item = news.find((entry) => entry.id === newsId) ?? news[0];
     const relatedLesson = lessons.find((lesson) => lesson.id === item.relatedLessonId) ?? lessons[0];
     const relatedMarkets = item.relatedMarketIds.map((id) => marketIndicators.find((indicator) => indicator.id === id)).filter(Boolean);
@@ -343,6 +375,25 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
         </article>
       </>
     );
+  };
+
+  const renderNewsDetail = () => {
+    const item = selectedNewsItem?.id === newsId ? selectedNewsItem : liveNews.find((entry) => entry.id === newsId) ?? news.find((entry) => entry.id === newsId) ?? liveNews[0] ?? news[0];
+    return <NewsDetailView
+      item={item}
+      bookmarked={savedNewsIds.has(item.id)}
+      notice={notice}
+      interactions={newsInteractions}
+      onBack={back}
+      onBookmark={() => toggleBookmark(item.id)}
+      onOpenExplain={() => openNewsExplanation(item.id)}
+      onNotice={setNotice}
+    />;
+  };
+
+  const renderNewsExplain = () => {
+    const item = selectedNewsItem?.id === newsId ? selectedNewsItem : liveNews.find((entry) => entry.id === newsId) ?? news.find((entry) => entry.id === newsId) ?? liveNews[0] ?? news[0];
+    return <NewsExplainView item={item} onBack={back} />;
   };
 
   const renderMarket = () => (
@@ -479,7 +530,7 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
       { icon: BellRing, title: "알림 설정", action: () => setNotice("알림 설정은 다음 MVP 단계에서 연결할 수 있어요.") },
       { icon: Settings, title: "앱 설정", action: () => setNotice("앱 설정은 다음 MVP 단계에서 연결할 수 있어요.") },
       { icon: CircleHelp, title: "고객센터", action: () => setNotice("고객센터는 다음 MVP 단계에서 연결할 수 있어요.") },
-      { icon: Info, title: "서비스 소개", action: () => setNotice("Jester는 경제 흐름을 쉽고 친근하게 설명하는 서비스예요.") },
+      { icon: Info, title: "서비스 소개", action: () => setNotice("EconFlow는 경제 흐름을 쉽고 친근하게 설명하는 서비스예요.") },
     ];
     return (
       <>
@@ -488,20 +539,22 @@ export default function EconFlowApp({ initialView = "home", initialId }: { initi
           <section className="profile-identity"><Character size="sm" pose="basic" /><div><h1>서연님</h1><p>경제와 함께 성장하는 중이에요! <span aria-hidden="true">🌱</span></p></div><ChevronRight aria-hidden="true" /></section>
           <section className="profile-level"><div><strong>Lv.3</strong><span>320 / 500</span></div><div className="profile-level-track"><i /></div><span className="profile-level-badge"><Star aria-hidden="true" /></span></section>
           <section className="profile-shortcuts">{shortcuts.map((item) => { const Icon = item.icon; return <button key={item.title} onClick={item.action}><span><Icon aria-hidden="true" /></span><strong>{item.title}</strong><small>{item.value}</small></button>; })}</section>
-          <section className="profile-flow-banner"><div><strong>Jester와 함께</strong><p>경제 흐름을 더 쉽게 이해해보세요.</p></div><Character size="sm" pose="happy" /></section>
+          <section className="profile-flow-banner"><div><strong>EconFlow와 함께</strong><p>경제 흐름을 더 쉽게 이해해보세요.</p></div><Character size="sm" pose="happy" /></section>
           <div className="profile-settings-list">{menu.map((item) => { const Icon = item.icon; return <button key={item.title} onClick={item.action}><span className="profile-menu-icon"><Icon aria-hidden="true" /></span><strong>{item.title}</strong><ChevronRight aria-hidden="true" /></button>; })}</div>
           {notice ? <div className="inline-notice"><CheckCircle2 aria-hidden="true" />{notice}</div> : null}
-          <p className="demo-label">Jester MVP · 데모 콘텐츠</p>
+          <p className="demo-label">EconFlow MVP · 데모 콘텐츠</p>
         </div>
       </>
     );
   };
 
-  const current = view === "home" ? renderHome() : view === "issues" ? renderIssues() : view === "issue-detail" ? renderIssueDetail() : view === "news" ? renderNews() : view === "news-detail" ? renderNewsDetail() : view === "study" ? renderStudy() : view === "lesson" ? renderLesson() : view === "research" ? renderResearch() : view === "market" ? renderMarket() : view === "market-detail" ? renderMarketDetail() : renderProfile();
+  void renderNewsLegacy;
+  void renderNewsDetailLegacy;
+  const current = view === "home" ? renderHome() : view === "issues" ? renderIssues() : view === "issue-detail" ? renderIssueDetail() : view === "news" ? renderNews() : view === "news-detail" ? renderNewsDetail() : view === "news-explain" ? renderNewsExplain() : view === "study" ? renderStudy() : view === "lesson" ? renderLesson() : view === "research" ? renderResearch() : view === "market" ? renderMarket() : view === "market-detail" ? renderMarketDetail() : renderProfile();
 
   return (
-    <main className="app-canvas app-dark-canvas">
-      <div className="phone-shell app-dark-shell">
+    <main className="app-canvas app-light-canvas">
+      <div className="phone-shell app-light-shell">
         {current}
         <BottomNavigation active={activeTab} onNavigate={navigateTab} />
       </div>

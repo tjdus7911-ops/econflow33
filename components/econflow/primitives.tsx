@@ -35,7 +35,7 @@ export type { CharacterPose, CharacterSize } from "./Character";
 
 export type MainTab = "home" | "news" | "research" | "market" | "profile";
 
-export const displayBrandName = (value: string) => value.replaceAll("EconFlow", "Jester");
+export const displayBrandName = (value: string) => value.replaceAll("Jester", "EconFlow");
 
 export function AppHeader({
   title,
@@ -52,7 +52,7 @@ export function AppHeader({
 }) {
   const ActionIcon = action === "bell" ? Bell : action === "settings" ? Settings : action === "info" ? Info : Search;
   return (
-    <header className={`app-header${!onBack && title === "Jester" ? " app-header-brand" : ""}`}>
+    <header className={`app-header${!onBack && title === "EconFlow" ? " app-header-brand" : ""}`}>
       <div className="header-side">
         {onBack ? (
           <button className="icon-button subtle" onClick={onBack} aria-label="이전 화면">
@@ -60,7 +60,7 @@ export function AppHeader({
           </button>
         ) : null}
       </div>
-      <strong className={onBack ? "header-title centered" : "brand"}>{title === "Jester" ? <><span>J</span>ester</> : title}</strong>
+      <strong className={onBack ? "header-title centered" : "brand"}>{title === "EconFlow" ? <>Econ<span>Flow</span></> : title}</strong>
       <div className="header-side end">
         {action === "home" ? <>
           <button className="icon-button" onClick={onSearch} aria-label="검색"><Search aria-hidden="true" /></button>
@@ -146,22 +146,15 @@ export function IssueCard({ issue, compact = false, onClick }: { issue: Issue; c
   );
 }
 
-const fallbackNewsThumbnail = (item: NewsItem) => {
-  const text = `${item.title} ${item.category} ${item.keywords.join(" ")}`;
-  if (/AI|반도체|데이터센터|산업|테크/.test(text)) return "/news/technology.webp";
-  if (/환율|달러|원화|글로벌|운임/.test(text)) return "/news/currency.webp";
-  return "/news/rates.webp";
-};
-
 export function FeaturedNewsCard({ item, onClick, bookmarked = false, onBookmark }: { item: NewsItem; onClick: () => void; bookmarked?: boolean; onBookmark?: () => void }) {
-  const fallbackThumbnail = fallbackNewsThumbnail(item);
-  const thumbnail = item.thumbnailUrl || item.imageUrl || item.thumbnail || fallbackThumbnail;
+  const thumbnail = item.thumbnailUrl || item.imageUrl || item.thumbnail;
   return (
     <article className="featured-news" data-category={item.category}>
       <button className="featured-news-main" onClick={onClick}>
-      <span className={`featured-news-visual tone-${item.category}`}>
-        <img src={thumbnail} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = fallbackThumbnail; }} />
-      </span>
+      {thumbnail ? <span className={`featured-news-visual tone-${item.category}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={thumbnail} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.closest(".featured-news-visual")?.remove(); }} />
+      </span> : null}
       <span className="featured-news-copy">
         <span className="news-label-row"><Badge tone="blue">{item.category}</Badge><span className={`content-type-label ${item.contentType}`}>{item.contentType === "briefing" ? "BRIEFING" : "NEWS"}</span></span>
         <strong>{item.title}</strong>
@@ -175,12 +168,16 @@ export function FeaturedNewsCard({ item, onClick, bookmarked = false, onBookmark
 }
 
 export function NewsCard({ item, compact = false, onClick, bookmarked = false, onBookmark, showSource = false }: { item: NewsItem; compact?: boolean; onClick: () => void; bookmarked?: boolean; onBookmark?: () => void; showSource?: boolean }) {
-  const fallbackThumbnail = fallbackNewsThumbnail(item);
-  const thumbnail = item.thumbnailUrl || item.imageUrl || item.thumbnail || fallbackThumbnail;
+  const thumbnail = item.thumbnailUrl || item.imageUrl || item.thumbnail;
   return (
     <article className={`news-card${compact ? " compact" : ""}`} data-category={item.category}>
       <button className="news-card-main" onClick={onClick}>
-        <span className={`news-thumb tone-${item.category}`}><img src={thumbnail} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = fallbackThumbnail; }} /></span>
+        {thumbnail ? (
+          <span className={`news-thumb tone-${item.category}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={thumbnail} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.closest(".news-thumb")?.remove(); }} />
+          </span>
+        ) : null}
         <span className="news-copy">
           <strong>{item.title}</strong>
           {!compact ? <span className="news-summary">{item.summary}</span> : null}
